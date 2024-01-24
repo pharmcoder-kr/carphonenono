@@ -3,27 +3,34 @@ package com.leehakjun.newscreentest
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.PowerManager
 import android.widget.Button
 import android.widget.TextView
+import android.widget.ToggleButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.skt.Tmap.TMapTapi
+
 
 class MainActivity : AppCompatActivity() {
-
     private lateinit var startButton: Button
     private lateinit var stopButton: Button
     private lateinit var elapsedTimeTextView: TextView
     private lateinit var recordTextView: TextView
     private lateinit var scoreTextView: TextView // Added TextView for displaying the score
+    private lateinit var autoStartToggleButton: ToggleButton // Added ToggleButton for auto-start feature
+    private lateinit var powerManager: PowerManager
+    private lateinit var sharedPreferences: SharedPreferences
+
 
     private var countDownTimer: CountDownTimer? = null
     private var isTimerRunning = false
     private var elapsedTime: Long = 0L
-    private lateinit var powerManager: PowerManager
     private var recordText: String = ""
+
 
     private val screenStateReceiver = object : android.content.BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -35,8 +42,8 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
                 Intent.ACTION_SCREEN_ON -> {
-                    // Screen on, restart the timer
-                    if (isTimerRunning) {
+                    // Screen on, restart the timer if auto-start is enabled
+                    if (isTimerRunning && isAutoStartEnabled()) {
                         startTimer()
                     }
                 }
@@ -53,12 +60,25 @@ class MainActivity : AppCompatActivity() {
         elapsedTimeTextView = findViewById(R.id.elapsedTimeTextView)
         recordTextView = findViewById(R.id.recordTextView)
         scoreTextView = findViewById(R.id.scoreTextView) // Initialize the scoreTextView
+        autoStartToggleButton = findViewById(R.id.autoStartToggleButton) // Initialize the autoStartToggleButton
         powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+        sharedPreferences = getPreferences(Context.MODE_PRIVATE)
+
+        // Set the initial state of the ToggleButton
+        autoStartToggleButton.isChecked = isAutoStartEnabled()
 
         startButton.setOnClickListener {
             if (!isTimerRunning) {
                 startTimer()
                 isTimerRunning = true
+
+                val handler = android.os.Handler()
+                handler.postDelayed({
+                    val tmaptapi = TMapTapi(this@MainActivity)
+                    tmaptapi.setSKTMapAuthentication("z28g7ycCBJawmTWhOKudu5OVQMMoV0HJ9QNtI3Wj")
+                    tmaptapi.invokeGoHome()
+                }, 5000)
+
             }
         }
 
@@ -67,6 +87,17 @@ class MainActivity : AppCompatActivity() {
                 stopTimer()
                 isTimerRunning = false
             }
+        }
+
+        autoStartToggleButton.setOnCheckedChangeListener { _, isChecked ->
+            // Save the state of the ToggleButton in SharedPreferences
+            saveAutoStartState(isChecked)
+        }
+
+        // Check the state of the ToggleButton and start the timer if needed
+        if (isAutoStartEnabled() && !isTimerRunning) {
+            startTimer()
+            isTimerRunning = true
         }
     }
 
@@ -132,7 +163,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     private fun updateScoreText(score: Int) {
         val scoreText = getString(R.string.score_format, score)
         scoreTextView.text = scoreText
@@ -142,6 +172,16 @@ class MainActivity : AppCompatActivity() {
         // Display the saved records on the screen
         recordTextView.text = recordText
         recordTextView.setTextColor(ContextCompat.getColor(this, R.color.red)) // Set the text color to red
+    }
+
+    private fun isAutoStartEnabled(): Boolean {
+        // Retrieve the state of the ToggleButton from SharedPreferences
+        return sharedPreferences.getBoolean("autoStartEnabled", false)
+    }
+
+    private fun saveAutoStartState(isEnabled: Boolean) {
+        // Save the state of the ToggleButton in SharedPreferences
+        sharedPreferences.edit().putBoolean("autoStartEnabled", isEnabled).apply()
     }
 
     override fun onResume() {
@@ -160,7 +200,6 @@ class MainActivity : AppCompatActivity() {
         // Display the records when the app resumes
         showRecords()
     }
-
     override fun onPause() {
         super.onPause()
         unregisterReceiver(screenStateReceiver)
@@ -171,3 +210,4 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
+
