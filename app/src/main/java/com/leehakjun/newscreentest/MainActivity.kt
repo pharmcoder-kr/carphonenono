@@ -113,6 +113,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startTimer() {
+        // TMap API 연동 코드 추가
+        if (isAutoStartEnabled()) {
+            val tmaptapi = TMapTapi(this@MainActivity)
+            tmaptapi.setSKTMapAuthentication("z28g7ycCBJawmTWhOKudu5OVQMMoV0HJ9QNtI3Wj")
+
+            tmaptapi.setOnAuthenticationListener(object : TMapTapi.OnAuthenticationListenerCallback {
+                override fun SKTMapApikeySucceed() {
+                    Log.d("TMapAuth", "API 인증 성공")
+                    tmaptapi.invokeGoHome()
+                    Log.d("TMapDebug", "invokeGoHome 호출됨")
+                }
+
+                override fun SKTMapApikeyFailed(errorMsg: String) {
+                    Log.e("TMapAuth", "API 인증 실패: $errorMsg")
+                }
+            })
+        }
         countDownTimer?.cancel() // Cancel the existing timer
         countDownTimer = object : CountDownTimer(Long.MAX_VALUE, 1000) {
             override fun onTick(millisUntilFinished: Long) {
