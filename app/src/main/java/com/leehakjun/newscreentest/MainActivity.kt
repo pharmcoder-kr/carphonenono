@@ -7,6 +7,7 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.PowerManager
+import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import android.widget.ToggleButton
@@ -69,18 +70,28 @@ class MainActivity : AppCompatActivity() {
 
         startButton.setOnClickListener {
             if (!isTimerRunning) {
+                Log.d("TMapDebug", "Start 버튼 클릭됨")
+
+                val tmaptapi = TMapTapi(this@MainActivity)
+                tmaptapi.setSKTMapAuthentication("z28g7ycCBJawmTWhOKudu5OVQMMoV0HJ9QNtI3Wj")
+
+                tmaptapi.setOnAuthenticationListener(object : TMapTapi.OnAuthenticationListenerCallback {
+                    override fun SKTMapApikeySucceed() {
+                        Log.d("TMapAuth", "API 인증 성공")
+                        tmaptapi.invokeGoHome()
+                        Log.d("TMapDebug", "invokeGoHome 호출됨")
+                    }
+
+                    override fun SKTMapApikeyFailed(errorMsg: String) {
+                        Log.e("TMapAuth", "API 인증 실패: $errorMsg")
+                    }
+                })
+
                 startTimer()
                 isTimerRunning = true
-
-                val handler = android.os.Handler()
-                handler.postDelayed({
-                    val tmaptapi = TMapTapi(this@MainActivity)
-                    tmaptapi.setSKTMapAuthentication("z28g7ycCBJawmTWhOKudu5OVQMMoV0HJ9QNtI3Wj")
-                    tmaptapi.invokeGoHome()
-                }, 5000)
-
             }
         }
+
 
         stopButton.setOnClickListener {
             if (isTimerRunning) {
