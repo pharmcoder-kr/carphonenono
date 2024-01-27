@@ -1,5 +1,6 @@
 package com.leehakjun.newscreentest
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -15,23 +16,22 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.skt.Tmap.TMapTapi
 
-
 class MainActivity : AppCompatActivity() {
     private lateinit var startButton: Button
     private lateinit var stopButton: Button
     private lateinit var elapsedTimeTextView: TextView
     private lateinit var recordTextView: TextView
-    private lateinit var scoreTextView: TextView // Added TextView for displaying the score
-    private lateinit var autoStartToggleButton: ToggleButton // Added ToggleButton for auto-start feature
+    private lateinit var scoreTextView: TextView
+    private lateinit var autoStartToggleButton: ToggleButton
+    private lateinit var routineButton: Button // Added routineButton
+
     private lateinit var powerManager: PowerManager
     private lateinit var sharedPreferences: SharedPreferences
-
 
     private var countDownTimer: CountDownTimer? = null
     private var isTimerRunning = false
     private var elapsedTime: Long = 0L
     private var recordText: String = ""
-
 
     private val screenStateReceiver = object : android.content.BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -60,12 +60,13 @@ class MainActivity : AppCompatActivity() {
         stopButton = findViewById(R.id.stopButton)
         elapsedTimeTextView = findViewById(R.id.elapsedTimeTextView)
         recordTextView = findViewById(R.id.recordTextView)
-        scoreTextView = findViewById(R.id.scoreTextView) // Initialize the scoreTextView
-        autoStartToggleButton = findViewById(R.id.autoStartToggleButton) // Initialize the autoStartToggleButton
+        scoreTextView = findViewById(R.id.scoreTextView)
+        autoStartToggleButton = findViewById(R.id.autoStartToggleButton)
+        routineButton = findViewById(R.id.routineButton) // Initialize the routineButton
+
         powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
         sharedPreferences = getPreferences(Context.MODE_PRIVATE)
 
-        // Set the initial state of the ToggleButton
         autoStartToggleButton.isChecked = isAutoStartEnabled()
 
         startButton.setOnClickListener {
@@ -92,7 +93,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-
         stopButton.setOnClickListener {
             if (isTimerRunning) {
                 stopTimer()
@@ -101,11 +101,22 @@ class MainActivity : AppCompatActivity() {
         }
 
         autoStartToggleButton.setOnCheckedChangeListener { _, isChecked ->
-            // Save the state of the ToggleButton in SharedPreferences
             saveAutoStartState(isChecked)
         }
 
-        // Check the state of the ToggleButton and start the timer if needed
+        routineButton.setOnClickListener {
+            // Create an intent to open the "모드 및 루틴" screen
+            val intent = Intent()
+            intent.setClassName("com.samsung.android.app.routines", "com.samsung.android.app.routines.ui.main.RoutineLaunchActivity")
+
+            try {
+                startActivity(intent)
+            } catch (e: ActivityNotFoundException) {
+                // Handle the case where the "모드 및 루틴" activity is not found
+                // You can display a message or take alternative actions here
+            }
+        }
+
         if (isAutoStartEnabled() && !isTimerRunning) {
             startTimer()
             isTimerRunning = true
@@ -130,7 +141,7 @@ class MainActivity : AppCompatActivity() {
                 }
             })
         }
-        countDownTimer?.cancel() // Cancel the existing timer
+        countDownTimer?.cancel()
         countDownTimer = object : CountDownTimer(Long.MAX_VALUE, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 elapsedTime += 1000
@@ -146,11 +157,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun stopTimer() {
         countDownTimer?.cancel()
-
-        // Save the record and display on the screen
         saveRecord(elapsedTime)
         showRecords()
-
         elapsedTime = 0L
         updateTimerText(elapsedTime)
     }
@@ -159,15 +167,12 @@ class MainActivity : AppCompatActivity() {
         val seconds = time / 1000
         val minutes = seconds / 60
         val hours = minutes / 60
-
         val formattedTime = String.format("%02d:%02d:%02d", hours, minutes % 60, seconds % 60)
         elapsedTimeTextView.text = formattedTime
     }
 
     private fun saveRecord(record: Long) {
-        // Concatenate the current record to the existing records
         recordText = "$recordText\n${formatRecord(record)}"
-        // Calculate and display the score
         val score = calculateScore(record)
         updateScoreText(score)
     }
@@ -176,18 +181,16 @@ class MainActivity : AppCompatActivity() {
         val seconds = record / 1000
         val minutes = seconds / 60
         val hours = minutes / 60
-
         return String.format("%02d:%02d:%02d", hours, minutes % 60, seconds % 60)
     }
 
     private fun calculateScore(elapsedTime: Long): Int {
         val seconds = elapsedTime / 1000
-
         return when {
             seconds <= 10 -> (1000 - seconds).toInt()
             seconds <= 30 -> (1000 - (10 + (seconds - 10) * 2)).toInt()
             seconds <= 60 -> (1000 - (10 + 20 + (seconds - 30) * 3)).toInt()
-            else -> (1000 - (10 + 20 + 90)).toInt() // 61초 이상은 초당 3점씩 감점으로 계산
+            else -> (1000 - (10 + 20 + 90)).toInt()
         }
     }
 
@@ -197,18 +200,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showRecords() {
-        // Display the saved records on the screen
         recordTextView.text = recordText
-        recordTextView.setTextColor(ContextCompat.getColor(this, R.color.red)) // Set the text color to red
+        recordTextView.setTextColor(ContextCompat.getColor(this, R.color.red))
     }
 
     private fun isAutoStartEnabled(): Boolean {
-        // Retrieve the state of the ToggleButton from SharedPreferences
         return sharedPreferences.getBoolean("autoStartEnabled", false)
     }
 
     private fun saveAutoStartState(isEnabled: Boolean) {
-        // Save the state of the ToggleButton in SharedPreferences
         sharedPreferences.edit().putBoolean("autoStartEnabled", isEnabled).apply()
     }
 
@@ -220,23 +220,19 @@ class MainActivity : AppCompatActivity() {
         }
         registerReceiver(screenStateReceiver, filter)
 
-        // If the timer was running and the screen is interactive, restart the timer
         if (isTimerRunning && powerManager.isInteractive) {
             startTimer()
         }
 
-        // Display the records when the app resumes
         showRecords()
     }
+
     override fun onPause() {
         super.onPause()
         unregisterReceiver(screenStateReceiver)
 
-        // If the timer was running and the screen is off, pause the timer
         if (isTimerRunning && !powerManager.isInteractive) {
             countDownTimer?.cancel()
         }
     }
 }
-
-//테스트입니다
