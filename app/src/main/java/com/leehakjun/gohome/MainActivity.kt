@@ -1,4 +1,4 @@
-package com.leehakjun.newscreentest
+package com.leehakjun.gohome
 
 import android.content.ActivityNotFoundException
 import android.content.Context

@@ -1,4 +1,4 @@
-package com.leehakjun.newscreentest
+package com.leehakjun.gohome
 
 import org.junit.Test
 

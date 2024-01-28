@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.leehakjun.newscreentest"
+    namespace = "com.leehakjun.gohome"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.leehakjun.newscreentest"
+        applicationId = "com.leehakjun.gohome"
         minSdk = 27
         targetSdk = 33
         versionCode = 1
