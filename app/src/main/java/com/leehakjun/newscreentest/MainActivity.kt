@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity() {
                 tmaptapi.setOnAuthenticationListener(object : TMapTapi.OnAuthenticationListenerCallback {
                     override fun SKTMapApikeySucceed() {
                         Log.d("TMapAuth", "API 인증 성공")
-                        tmaptapi.invokeGoHome()
+                        tmaptapi.invokeGoCompany()
                         Log.d("TMapDebug", "invokeGoHome 호출됨")
                     }
 
