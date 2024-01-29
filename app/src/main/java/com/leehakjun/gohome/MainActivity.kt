@@ -1,6 +1,5 @@
 package com.leehakjun.gohome
 
-import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -11,7 +10,6 @@ import android.os.PowerManager
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
-import android.widget.ToggleButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.skt.Tmap.TMapTapi
@@ -22,8 +20,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var elapsedTimeTextView: TextView
     private lateinit var recordTextView: TextView
     private lateinit var scoreTextView: TextView
-    private lateinit var autoStartToggleButton: ToggleButton
-    private lateinit var routineButton: Button // Added routineButton
 
     private lateinit var powerManager: PowerManager
     private lateinit var sharedPreferences: SharedPreferences
@@ -37,13 +33,11 @@ class MainActivity : AppCompatActivity() {
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
                 Intent.ACTION_SCREEN_OFF -> {
-                    // Screen off, pause the timer
                     if (isTimerRunning) {
                         countDownTimer?.cancel()
                     }
                 }
                 Intent.ACTION_SCREEN_ON -> {
-                    // Screen on, restart the timer if auto-start is enabled
                     if (isTimerRunning && isAutoStartEnabled()) {
                         startTimer()
                     }
@@ -56,38 +50,24 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        sharedPreferences = getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
+
         startButton = findViewById(R.id.startButton)
         stopButton = findViewById(R.id.stopButton)
         elapsedTimeTextView = findViewById(R.id.elapsedTimeTextView)
         recordTextView = findViewById(R.id.recordTextView)
         scoreTextView = findViewById(R.id.scoreTextView)
-        autoStartToggleButton = findViewById(R.id.autoStartToggleButton)
-        routineButton = findViewById(R.id.routineButton) // Initialize the routineButton
+
+        val settingsButton: Button = findViewById(R.id.settingsButton)
+        settingsButton.setOnClickListener {
+            val intent = Intent(this, SettingsActivity::class.java)
+            startActivity(intent)
+        }
 
         powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
-        sharedPreferences = getPreferences(Context.MODE_PRIVATE)
-
-        autoStartToggleButton.isChecked = isAutoStartEnabled()
 
         startButton.setOnClickListener {
             if (!isTimerRunning) {
-                Log.d("TMapDebug", "Start 버튼 클릭됨")
-
-                val tmaptapi = TMapTapi(this@MainActivity)
-                tmaptapi.setSKTMapAuthentication("z28g7ycCBJawmTWhOKudu5OVQMMoV0HJ9QNtI3Wj")
-
-                tmaptapi.setOnAuthenticationListener(object : TMapTapi.OnAuthenticationListenerCallback {
-                    override fun SKTMapApikeySucceed() {
-                        Log.d("TMapAuth", "API 인증 성공")
-                        tmaptapi.invokeGoHome()
-                        Log.d("TMapDebug", "invokeGoHome 호출됨")
-                    }
-
-                    override fun SKTMapApikeyFailed(errorMsg: String) {
-                        Log.e("TMapAuth", "API 인증 실패: $errorMsg")
-                    }
-                })
-
                 startTimer()
                 isTimerRunning = true
             }
@@ -100,23 +80,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        autoStartToggleButton.setOnCheckedChangeListener { _, isChecked ->
-            saveAutoStartState(isChecked)
-        }
-
-        routineButton.setOnClickListener {
-            // Create an intent to open the "모드 및 루틴" screen
-            val intent = Intent()
-            intent.setClassName("com.samsung.android.app.routines", "com.samsung.android.app.routines.ui.main.RoutineLaunchActivity")
-
-            try {
-                startActivity(intent)
-            } catch (e: ActivityNotFoundException) {
-                // Handle the case where the "모드 및 루틴" activity is not found
-                // You can display a message or take alternative actions here
-            }
-        }
-
         if (isAutoStartEnabled() && !isTimerRunning) {
             startTimer()
             isTimerRunning = true
@@ -124,23 +87,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startTimer() {
-        // TMap API 연동 코드 추가
-        if (isAutoStartEnabled()) {
-            val tmaptapi = TMapTapi(this@MainActivity)
-            tmaptapi.setSKTMapAuthentication("z28g7ycCBJawmTWhOKudu5OVQMMoV0HJ9QNtI3Wj")
-
-            tmaptapi.setOnAuthenticationListener(object : TMapTapi.OnAuthenticationListenerCallback {
-                override fun SKTMapApikeySucceed() {
-                    Log.d("TMapAuth", "API 인증 성공")
-                    tmaptapi.invokeGoHome()
-                    Log.d("TMapDebug", "invokeGoHome 호출됨")
-                }
-
-                override fun SKTMapApikeyFailed(errorMsg: String) {
-                    Log.e("TMapAuth", "API 인증 실패: $errorMsg")
-                }
-            })
-        }
         countDownTimer?.cancel()
         countDownTimer = object : CountDownTimer(Long.MAX_VALUE, 1000) {
             override fun onTick(millisUntilFinished: Long) {
