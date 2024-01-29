@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <ToggleButton
+        android:id="@+id/autoStartToggleButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textOff="자동 시작 Off"
+        android:textOn="자동 시작 On"
+        android:layout_marginTop="20dp"/>
+
+    <Button
+        android:id="@+id/routineButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="루틴 설정"
+        android:layout_marginTop="20dp"/>
+
+    <!-- 여기에 추가적인 UI 요소를 배치할 수 있습니다 -->
+
+</LinearLayout>
