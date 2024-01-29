@@ -23,6 +23,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var powerManager: PowerManager
     private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var tmaptapi: TMapTapi
 
     private var countDownTimer: CountDownTimer? = null
     private var isTimerRunning = false
@@ -66,6 +67,10 @@ class MainActivity : AppCompatActivity() {
 
         powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
 
+        // TMapTapi 인스턴스 초기화
+        tmaptapi = TMapTapi(this)
+        tmaptapi.setSKTMapAuthentication("z28g7ycCBJawmTWhOKudu5OVQMMoV0HJ9QNtI3Wj")
+
         startButton.setOnClickListener {
             if (!isTimerRunning) {
                 startTimer()
@@ -87,6 +92,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startTimer() {
+        // TMap API 인증 리스너 설정
+        tmaptapi.setOnAuthenticationListener(object : TMapTapi.OnAuthenticationListenerCallback {
+            override fun SKTMapApikeySucceed() {
+                Log.d("TMapAuth", "API 인증 성공")
+                tmaptapi.invokeGoHome()
+                Log.d("TMapDebug", "invokeGoHome 호출됨")
+            }
+
+            override fun SKTMapApikeyFailed(errorMsg: String) {
+                Log.e("TMapAuth", "API 인증 실패: $errorMsg")
+            }
+        })
+
+        // 기존 타이머 설정 코드
         countDownTimer?.cancel()
         countDownTimer = object : CountDownTimer(Long.MAX_VALUE, 1000) {
             override fun onTick(millisUntilFinished: Long) {
