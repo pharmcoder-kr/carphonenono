@@ -13,6 +13,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.skt.Tmap.TMapTapi
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
     private lateinit var startButton: Button
@@ -73,8 +74,18 @@ class MainActivity : AppCompatActivity() {
 
         startButton.setOnClickListener {
             if (!isTimerRunning) {
-                startTimer()
-                isTimerRunning = true
+                val currentTime = getCurrentTime()
+                val workStartTime = sharedPreferences.getString("startTime", "")
+                val workEndTime = sharedPreferences.getString("endTime", "")
+
+                if (currentTime == workStartTime) {
+                    startNavigation(true) // 출근 시간에 작동
+                } else if (currentTime == workEndTime) {
+                    startNavigation(false) // 퇴근 시간에 작동
+                } else {
+                    startTimer()
+                    isTimerRunning = true
+                }
             }
         }
 
@@ -89,6 +100,13 @@ class MainActivity : AppCompatActivity() {
             startTimer()
             isTimerRunning = true
         }
+    }
+
+    private fun getCurrentTime(): String {
+        val calendar = Calendar.getInstance()
+        val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
+        val currentMinute = calendar.get(Calendar.MINUTE)
+        return String.format("%02d:%02d", currentHour, currentMinute)
     }
 
     private fun startTimer() {
@@ -175,6 +193,25 @@ class MainActivity : AppCompatActivity() {
 
     private fun saveAutoStartState(isEnabled: Boolean) {
         sharedPreferences.edit().putBoolean("autoStartEnabled", isEnabled).apply()
+    }
+
+    private fun startNavigation(isGoingToWork: Boolean) {
+        tmaptapi.setOnAuthenticationListener(object : TMapTapi.OnAuthenticationListenerCallback {
+            override fun SKTMapApikeySucceed() {
+                Log.d("TMapAuth", "API 인증 성공")
+                if (isGoingToWork) {
+                    tmaptapi.invokeGoCompany()
+                    Log.d("TMapDebug", "invokeGoCompany 호출됨")
+                } else {
+                    tmaptapi.invokeGoHome()
+                    Log.d("TMapDebug", "invokeGoHome 호출됨")
+                }
+            }
+
+            override fun SKTMapApikeyFailed(errorMsg: String) {
+                Log.e("TMapAuth", "API 인증 실패: $errorMsg")
+            }
+        })
     }
 
     override fun onResume() {
