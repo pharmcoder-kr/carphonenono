@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
         tmaptapi = TMapTapi(this)
         tmaptapi.setSKTMapAuthentication("z28g7ycCBJawmTWhOKudu5OVQMMoV0HJ9QNtI3Wj")
 
-// TMap API 인증 리스너 설정
+        // TMap API 인증 리스너 설정
         tmaptapi.setOnAuthenticationListener(object : TMapTapi.OnAuthenticationListenerCallback {
             override fun SKTMapApikeySucceed() {
                 // 인증 성공 시 로그 출력
@@ -92,13 +92,6 @@ class MainActivity : AppCompatActivity() {
                 val workEndTime = sharedPreferences.getString("endTime", "")
                 val workStartTime2 = sharedPreferences.getString("startTime2", "")
                 val workEndTime2 = sharedPreferences.getString("endTime2", "")
-
-
-                Log.d("TimeCheck", "Current Time: $currentTime")
-                Log.d("TimeCheck", "Work Start Time: $workStartTime")
-                Log.d("TimeCheck", "Work End Time: $workEndTime")
-                Log.d("TimeCheck", "Work Start Time 2: $workStartTime2")
-                Log.d("TimeCheck", "Work End Time 2: $workEndTime2")
 
                 // 출근 시간 범위 확인
                 workStartTime?.let { start ->
@@ -125,7 +118,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-
         stopButton.setOnClickListener {
             if (isTimerRunning) {
                 stopTimer()
@@ -147,19 +139,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startTimer() {
-        // TMap API 인증 리스너 설정
-        tmaptapi.setOnAuthenticationListener(object : TMapTapi.OnAuthenticationListenerCallback {
-            override fun SKTMapApikeySucceed() {
-                Log.d("TMapAuth", "API 인증 성공")
-                tmaptapi.invokeGoHome()
-                Log.d("TMapDebug", "invokeGoHome 호출됨")
-            }
-
-            override fun SKTMapApikeyFailed(errorMsg: String) {
-                Log.e("TMapAuth", "API 인증 실패: $errorMsg")
-            }
-        })
-
         // 기존 타이머 설정 코드
         countDownTimer?.cancel()
         countDownTimer = object : CountDownTimer(Long.MAX_VALUE, 1000) {
@@ -228,34 +207,19 @@ class MainActivity : AppCompatActivity() {
         return sharedPreferences.getBoolean("autoStartEnabled", false)
     }
 
-    private fun saveAutoStartState(isEnabled: Boolean) {
-        sharedPreferences.edit().putBoolean("autoStartEnabled", isEnabled).apply()
-    }
-
     private fun startNavigation(isGoingToWork: Boolean) {
         Log.d("NavigationCheck", "startNavigation 호출됨, isGoingToWork: $isGoingToWork")
 
-        tmaptapi.setOnAuthenticationListener(object : TMapTapi.OnAuthenticationListenerCallback {
-            override fun SKTMapApikeySucceed() {
-                Log.d("NavigationCheck", "TMap API 인증 성공")
-
-                if (isGoingToWork) {
-                    Log.d("NavigationCheck", "invokeGoCompany 호출 전")
-                    tmaptapi.invokeGoCompany()
-                    Log.d("NavigationCheck", "invokeGoCompany 호출 후")
-                } else {
-                    Log.d("NavigationCheck", "invokeGoHome 호출 전")
-                    tmaptapi.invokeGoHome()
-                    Log.d("NavigationCheck", "invokeGoHome 호출 후")
-                }
-            }
-
-            override fun SKTMapApikeyFailed(errorMsg: String) {
-                Log.e("NavigationCheck", "TMap API 인증 실패: $errorMsg")
-            }
-        })
+        if (isGoingToWork) {
+            Log.d("NavigationCheck", "invokeGoCompany 호출 전")
+            tmaptapi.invokeGoCompany()
+            Log.d("NavigationCheck", "invokeGoCompany 호출 후")
+        } else {
+            Log.d("NavigationCheck", "invokeGoHome 호출 전")
+            tmaptapi.invokeGoHome()
+            Log.d("NavigationCheck", "invokeGoHome 호출 후")
+        }
     }
-
 
     override fun onResume() {
         super.onResume()
