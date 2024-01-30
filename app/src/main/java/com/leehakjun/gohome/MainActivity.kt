@@ -24,7 +24,6 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var powerManager: PowerManager
     private lateinit var sharedPreferences: SharedPreferences
-    private lateinit var tmaptapi: TMapTapi
 
     private var countDownTimer: CountDownTimer? = null
     private var isTimerRunning = false
@@ -68,23 +67,6 @@ class MainActivity : AppCompatActivity() {
 
         powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
 
-        // TMapTapi 인스턴스 초기화
-        tmaptapi = TMapTapi(this)
-        tmaptapi.setSKTMapAuthentication("z28g7ycCBJawmTWhOKudu5OVQMMoV0HJ9QNtI3Wj")
-
-        // TMap API 인증 리스너 설정
-        tmaptapi.setOnAuthenticationListener(object : TMapTapi.OnAuthenticationListenerCallback {
-            override fun SKTMapApikeySucceed() {
-                // 인증 성공 시 로그 출력
-                Log.d("TMapAuth", "API 인증 성공")
-            }
-
-            override fun SKTMapApikeyFailed(errorMsg: String) {
-                // 인증 실패 시 로그 출력
-                Log.e("TMapAuth", "API 인증 실패: $errorMsg")
-            }
-        })
-
         startButton.setOnClickListener {
             if (!isTimerRunning) {
                 val currentTime = getCurrentTime()
@@ -126,7 +108,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (isAutoStartEnabled() && !isTimerRunning) {
-            startTimer()
+            startButton.performClick()
             isTimerRunning = true
         }
     }
@@ -204,21 +186,39 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun isAutoStartEnabled(): Boolean {
-        return sharedPreferences.getBoolean("autoStartEnabled", false)
+        return sharedPreferences.getBoolean("autoStartEnabled", true)
     }
 
     private fun startNavigation(isGoingToWork: Boolean) {
         Log.d("NavigationCheck", "startNavigation 호출됨, isGoingToWork: $isGoingToWork")
 
-        if (isGoingToWork) {
-            Log.d("NavigationCheck", "invokeGoCompany 호출 전")
-            tmaptapi.invokeGoCompany()
-            Log.d("NavigationCheck", "invokeGoCompany 호출 후")
-        } else {
-            Log.d("NavigationCheck", "invokeGoHome 호출 전")
-            tmaptapi.invokeGoHome()
-            Log.d("NavigationCheck", "invokeGoHome 호출 후")
-        }
+        // TMapTapi 인스턴스 초기화 및 인증
+        val tmaptapi = TMapTapi(this)
+        tmaptapi.setSKTMapAuthentication("z28g7ycCBJawmTWhOKudu5OVQMMoV0HJ9QNtI3Wj")
+
+        // TMap API 인증 리스너 설정
+        tmaptapi.setOnAuthenticationListener(object : TMapTapi.OnAuthenticationListenerCallback {
+            override fun SKTMapApikeySucceed() {
+                // 인증 성공 시 로그 출력
+                Log.d("TMapAuth", "API 인증 성공")
+
+                // TMap 인증이 성공한 후에 TMap 연동을 시작할 수 있습니다.
+                if (isGoingToWork) {
+                    Log.d("NavigationCheck", "invokeGoCompany 호출 전")
+                    tmaptapi.invokeGoCompany()
+                    Log.d("NavigationCheck", "invokeGoCompany 호출 후")
+                } else {
+                    Log.d("NavigationCheck", "invokeGoHome 호출 전")
+                    tmaptapi.invokeGoHome()
+                    Log.d("NavigationCheck", "invokeGoHome 호출 후")
+                }
+            }
+
+            override fun SKTMapApikeyFailed(errorMsg: String) {
+                // 인증 실패 시 로그 출력
+                Log.e("TMapAuth", "API 인증 실패: $errorMsg")
+            }
+        })
     }
 
     override fun onResume() {
