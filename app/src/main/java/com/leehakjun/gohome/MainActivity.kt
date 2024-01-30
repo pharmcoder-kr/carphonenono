@@ -72,22 +72,59 @@ class MainActivity : AppCompatActivity() {
         tmaptapi = TMapTapi(this)
         tmaptapi.setSKTMapAuthentication("z28g7ycCBJawmTWhOKudu5OVQMMoV0HJ9QNtI3Wj")
 
+// TMap API 인증 리스너 설정
+        tmaptapi.setOnAuthenticationListener(object : TMapTapi.OnAuthenticationListenerCallback {
+            override fun SKTMapApikeySucceed() {
+                // 인증 성공 시 로그 출력
+                Log.d("TMapAuth", "API 인증 성공")
+            }
+
+            override fun SKTMapApikeyFailed(errorMsg: String) {
+                // 인증 실패 시 로그 출력
+                Log.e("TMapAuth", "API 인증 실패: $errorMsg")
+            }
+        })
+
         startButton.setOnClickListener {
             if (!isTimerRunning) {
                 val currentTime = getCurrentTime()
                 val workStartTime = sharedPreferences.getString("startTime", "")
                 val workEndTime = sharedPreferences.getString("endTime", "")
+                val workStartTime2 = sharedPreferences.getString("startTime2", "")
+                val workEndTime2 = sharedPreferences.getString("endTime2", "")
 
-                if (currentTime == workStartTime) {
-                    startNavigation(true) // 출근 시간에 작동
-                } else if (currentTime == workEndTime) {
-                    startNavigation(false) // 퇴근 시간에 작동
-                } else {
+
+                Log.d("TimeCheck", "Current Time: $currentTime")
+                Log.d("TimeCheck", "Work Start Time: $workStartTime")
+                Log.d("TimeCheck", "Work End Time: $workEndTime")
+                Log.d("TimeCheck", "Work Start Time 2: $workStartTime2")
+                Log.d("TimeCheck", "Work End Time 2: $workEndTime2")
+
+                // 출근 시간 범위 확인
+                workStartTime?.let { start ->
+                    workEndTime?.let { end ->
+                        if (currentTime in start..end) {
+                            startNavigation(true) // 출근 시간에 TMap GoCompany 실행
+                        }
+                    }
+                }
+
+                // 퇴근 시간 범위 확인
+                workStartTime2?.let { start2 ->
+                    workEndTime2?.let { end2 ->
+                        if (currentTime in start2..end2) {
+                            startNavigation(false) // 퇴근 시간에 TMap GoHome 실행
+                        }
+                    }
+                }
+
+                if (!isTimerRunning) {
                     startTimer()
                     isTimerRunning = true
                 }
             }
         }
+
 
         stopButton.setOnClickListener {
             if (isTimerRunning) {
@@ -196,23 +233,29 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startNavigation(isGoingToWork: Boolean) {
+        Log.d("NavigationCheck", "startNavigation 호출됨, isGoingToWork: $isGoingToWork")
+
         tmaptapi.setOnAuthenticationListener(object : TMapTapi.OnAuthenticationListenerCallback {
             override fun SKTMapApikeySucceed() {
-                Log.d("TMapAuth", "API 인증 성공")
+                Log.d("NavigationCheck", "TMap API 인증 성공")
+
                 if (isGoingToWork) {
+                    Log.d("NavigationCheck", "invokeGoCompany 호출 전")
                     tmaptapi.invokeGoCompany()
-                    Log.d("TMapDebug", "invokeGoCompany 호출됨")
+                    Log.d("NavigationCheck", "invokeGoCompany 호출 후")
                 } else {
+                    Log.d("NavigationCheck", "invokeGoHome 호출 전")
                     tmaptapi.invokeGoHome()
-                    Log.d("TMapDebug", "invokeGoHome 호출됨")
+                    Log.d("NavigationCheck", "invokeGoHome 호출 후")
                 }
             }
 
             override fun SKTMapApikeyFailed(errorMsg: String) {
-                Log.e("TMapAuth", "API 인증 실패: $errorMsg")
+                Log.e("NavigationCheck", "TMap API 인증 실패: $errorMsg")
             }
         })
     }
+
 
     override fun onResume() {
         super.onResume()
