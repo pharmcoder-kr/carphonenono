@@ -4,17 +4,23 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
+import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.PowerManager
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.skt.Tmap.TMapTapi
 import java.util.*
+import android.content.pm.ShortcutInfo
+import android.content.pm.ShortcutManager
 
+
+@RequiresApi(26)
 class MainActivity : AppCompatActivity() {
     private lateinit var startButton: Button
     private lateinit var stopButton: Button
@@ -49,6 +55,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // 쇼트컷 생성 코드 추가
+        createShortcut()
+
         setContentView(R.layout.activity_main)
 
         sharedPreferences = getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
@@ -101,10 +111,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         stopButton.setOnClickListener {
-            if (isTimerRunning) {
-                stopTimer()
-                isTimerRunning = false
-            }
+            stopTimer()
+            isTimerRunning = false
         }
 
         if (isAutoStartEnabled() && !isTimerRunning) {
@@ -243,5 +251,28 @@ class MainActivity : AppCompatActivity() {
         if (isTimerRunning && !powerManager.isInteractive) {
             countDownTimer?.cancel()
         }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        if (intent?.action == "com.leehakjun.gohome.STOP_TIMER") {
+            stopTimer()
+        }
+    }
+
+    private fun createShortcut() {
+        val shortcutManager = getSystemService(ShortcutManager::class.java)
+
+        val shortcutIntent = Intent(this, MainActivity::class.java)
+        shortcutIntent.action = "com.leehakjun.gohome.STOP_TIMER"
+
+        val shortcut = ShortcutInfo.Builder(this, "id1")
+            .setShortLabel("Stop Timer")
+            .setLongLabel("Stop Timer")
+            .setIcon(Icon.createWithResource(this, R.mipmap.ic_launcher))
+            .setIntent(shortcutIntent)
+            .build()
+
+        shortcutManager.dynamicShortcuts = listOf(shortcut)
     }
 }
