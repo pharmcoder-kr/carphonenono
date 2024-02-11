@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.PowerManager
@@ -12,7 +13,6 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.skt.Tmap.TMapTapi
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity() {
                 workStartTime?.let { start ->
                     workEndTime?.let { end ->
                         if (currentTime in start..end) {
-                            startNavigation(true) // 출근 시간에 TMap GoCompany 실행
+                            launchShortcut("회사") // 출근 시간에 "회사" 숏컷 실행
                         }
                     }
                 }
@@ -88,7 +88,7 @@ class MainActivity : AppCompatActivity() {
                 workStartTime2?.let { start2 ->
                     workEndTime2?.let { end2 ->
                         if (currentTime in start2..end2) {
-                            startNavigation(false) // 퇴근 시간에 TMap GoHome 실행
+                            launchShortcut("우리집") // 퇴근 시간에 "우리집" 숏컷 실행
                         }
                     }
                 }
@@ -189,36 +189,24 @@ class MainActivity : AppCompatActivity() {
         return sharedPreferences.getBoolean("autoStartEnabled", true)
     }
 
-    private fun startNavigation(isGoingToWork: Boolean) {
-        Log.d("NavigationCheck", "startNavigation 호출됨, isGoingToWork: $isGoingToWork")
-
-        // TMapTapi 인스턴스 초기화 및 인증
-        val tmaptapi = TMapTapi(this)
-        tmaptapi.setSKTMapAuthentication("z28g7ycCBJawmTWhOKudu5OVQMMoV0HJ9QNtI3Wj")
-
-        // TMap API 인증 리스너 설정
-        tmaptapi.setOnAuthenticationListener(object : TMapTapi.OnAuthenticationListenerCallback {
-            override fun SKTMapApikeySucceed() {
-                // 인증 성공 시 로그 출력
-                Log.d("TMapAuth", "API 인증 성공")
-
-                // TMap 인증이 성공한 후에 TMap 연동을 시작할 수 있습니다.
-                if (isGoingToWork) {
-                    Log.d("NavigationCheck", "invokeGoCompany 호출 전")
-                    tmaptapi.invokeGoCompany()
-                    Log.d("NavigationCheck", "invokeGoCompany 호출 후")
-                } else {
-                    Log.d("NavigationCheck", "invokeGoHome 호출 전")
-                    tmaptapi.invokeGoHome()
-                    Log.d("NavigationCheck", "invokeGoHome 호출 후")
-                }
-            }
-
-            override fun SKTMapApikeyFailed(errorMsg: String) {
-                // 인증 실패 시 로그 출력
-                Log.e("TMapAuth", "API 인증 실패: $errorMsg")
-            }
-        })
+    private fun launchShortcut(shortcutType: String) {
+        val intent = Intent(Intent.ACTION_VIEW)
+        val packageName: String
+        val data: String
+        if (shortcutType == "우리집") {
+            packageName = "com.skt.tmap.ku"
+            data = "tmap://goto?code=1"
+        } else { // "회사" 숏컷
+            packageName = "com.skt.tmap.ku"
+            data = "tmap://goto?code=2"
+        }
+        intent.setClassName(packageName, "com.skt.tmap.ku.IntroActivity")
+        intent.data = Uri.parse(data)
+        try {
+            startActivity(intent)
+        } catch (e: Exception) {
+            Log.e("LaunchShortcut", "Error launching shortcut: ${e.message}")
+        }
     }
 
     override fun onResume() {

@@ -21,7 +21,6 @@
         android:text="루틴 설정"
         android:layout_marginTop="20dp"/>
 
-    <!-- 출근시간 범위 설정 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -44,10 +43,9 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:gravity="center"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
             android:text="~"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            tools:ignore="TouchTargetSizeCheck" />
 
         <EditText
             android:id="@+id/endTimeEditText"
@@ -61,7 +59,6 @@
             android:minHeight="48dp" />
     </LinearLayout>
 
-    <!-- 퇴근시간 범위 설정 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -70,14 +67,14 @@
 
         <EditText
             android:id="@+id/startTimeEditText2"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:clickable="true"
-        android:focusable="false"
-        android:hint="퇴근시작"
-        android:inputType="none"
-        android:minHeight="48dp" />
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="false"
+            android:hint="퇴근시작"
+            android:inputType="none"
+            android:minHeight="48dp" />
 
         <EditText
             android:layout_width="wrap_content"
@@ -99,5 +96,12 @@
             android:inputType="none"
             android:minHeight="48dp" />
     </LinearLayout>
+
+    <Button
+        android:id="@+id/resetButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="출퇴근 시간 설정 초기화"
+        android:layout_marginTop="20dp"/>
 
 </LinearLayout>
