@@ -1,17 +1,21 @@
 package com.leehakjun.gohome
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.PowerManager
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import java.util.*
 
@@ -53,6 +57,9 @@ class MainActivity : AppCompatActivity() {
 
         sharedPreferences = getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
 
+        // 블루투스 및 위치 권한 요청
+        requestPermissions()
+
         startButton = findViewById(R.id.startButton)
         stopButton = findViewById(R.id.stopButton)
         elapsedTimeTextView = findViewById(R.id.elapsedTimeTextView)
@@ -66,6 +73,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+
+        if (!isTimerRunning && isAutoStartEnabled()) {
+            startButton.performClick()
+        }
 
         startButton.setOnClickListener {
             if (!isTimerRunning) {
@@ -93,10 +104,8 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
-                if (!isTimerRunning) {
-                    startTimer()
-                    isTimerRunning = true
-                }
+                startTimer()
+                isTimerRunning = true
             }
         }
 
@@ -106,12 +115,8 @@ class MainActivity : AppCompatActivity() {
                 isTimerRunning = false
             }
         }
-
-        if (isAutoStartEnabled() && !isTimerRunning) {
-            startButton.performClick()
-            isTimerRunning = true
-        }
     }
+
 
     private fun getCurrentTime(): String {
         val calendar = Calendar.getInstance()
@@ -222,6 +227,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         showRecords()
+
+        // 사용자에게 권한 요청 다이얼로그를 다시 표시
+        if (!hasPermissions()) {
+            showPermissionRequestDialog()
+        }
     }
 
     override fun onPause() {
@@ -231,5 +241,45 @@ class MainActivity : AppCompatActivity() {
         if (isTimerRunning && !powerManager.isInteractive) {
             countDownTimer?.cancel()
         }
+    }
+
+    private fun requestPermissions() {
+        // 블루투스 및 위치 권한 요청
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(
+                    Manifest.permission.BLUETOOTH,
+                    Manifest.permission.BLUETOOTH_ADMIN,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ),
+                101
+            )
+        }
+    }
+
+    private fun hasPermissions(): Boolean {
+        // 퍼미션이 모두 허용되었는지 확인
+        return (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) == android.content.pm.PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADMIN) == android.content.pm.PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED)
+    }
+
+    private fun showPermissionRequestDialog() {
+        // 사용자에게 권한을 요청하는 다이얼로그 표시
+        AlertDialog.Builder(this)
+            .setTitle("권한 요청")
+            .setMessage("이 앱을 사용하기 위해서는 블루투스 및 위치 권한이 필요합니다.")
+            .setPositiveButton("확인") { _, _ ->
+                // 사용자가 확인 버튼을 누를 경우, 권한을 다시 요청
+                requestPermissions()
+            }
+            .setNegativeButton("취소") { dialog, _ ->
+                // 사용자가 취소 버튼을 누를 경우, 앱을 종료하거나 추가적인 처리를 수행할 수 있음
+                dialog.dismiss()
+                finish()
+            }
+            .create()
+            .show()
     }
 }

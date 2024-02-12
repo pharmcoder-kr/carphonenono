@@ -22,6 +22,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var routineButton: Button // 루틴 설정 버튼 추가
     private lateinit var resetButton: Button // 출퇴근 시간 설정 초기화 버튼 추가
+    private lateinit var selectBluetoothButton: Button // 블루투스 설정 버튼 추가
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,6 +61,13 @@ class SettingsActivity : AppCompatActivity() {
             endTimeEditText.setText("12:00")
             startTimeEditText2.setText("12:00")
             endTimeEditText2.setText("23:59")
+        }
+
+        selectBluetoothButton = findViewById(R.id.selectBluetoothButton) // 블루투스 설정 버튼 연결
+        selectBluetoothButton.setOnClickListener {
+            // 블루투스 설정 액티비티 열기
+            val intent = Intent(this, BluetoothSettingsActivity::class.java)
+            startActivity(intent)
         }
 
         // 이전에 설정한 값이 있다면 가져와서 표시
