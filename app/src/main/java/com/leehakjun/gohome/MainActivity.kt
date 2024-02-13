@@ -1,6 +1,7 @@
 package com.leehakjun.gohome
 
 import android.Manifest
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -47,6 +48,15 @@ class MainActivity : AppCompatActivity() {
                         startTimer()
                     }
                 }
+            }
+        }
+    }
+
+    private val settingsChangedReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == "com.leehakjun.gohome.SETTINGS_CHANGED") {
+                // 화면을 업데이트합니다.
+                updateUI()
             }
         }
     }
@@ -219,8 +229,10 @@ class MainActivity : AppCompatActivity() {
         val filter = IntentFilter().apply {
             addAction(Intent.ACTION_SCREEN_ON)
             addAction(Intent.ACTION_SCREEN_OFF)
+            addAction("com.leehakjun.gohome.SETTINGS_CHANGED")
         }
         registerReceiver(screenStateReceiver, filter)
+        registerReceiver(settingsChangedReceiver, filter)
 
         if (isTimerRunning && powerManager.isInteractive) {
             startTimer()
@@ -237,6 +249,7 @@ class MainActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         unregisterReceiver(screenStateReceiver)
+        unregisterReceiver(settingsChangedReceiver)
 
         if (isTimerRunning && !powerManager.isInteractive) {
             countDownTimer?.cancel()
@@ -263,6 +276,11 @@ class MainActivity : AppCompatActivity() {
         return (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) == android.content.pm.PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADMIN) == android.content.pm.PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED)
+    }
+    private fun updateUI() {
+        // 설정이 변경될 때마다 UI를 업데이트하는 로직을 여기에 추가하세요.
+        // 예를 들어, 설정이 변경될 때마다 화면의 텍스트나 버튼 등을 업데이트할 수 있습니다.
+        // 여기에 필요한 로직을 추가하세요.
     }
 
     private fun showPermissionRequestDialog() {

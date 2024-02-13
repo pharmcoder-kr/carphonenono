@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TimePicker
@@ -70,6 +71,18 @@ class SettingsActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        // 저장된 블루투스 이름 가져오기
+        val selectedBluetoothName = sharedPreferences.getString("bluetooth_device", "")
+        Log.d("SettingsActivity", "Selected Bluetooth Device: $selectedBluetoothName")
+
+        // 차량 블루투스 설정 버튼 아래에 저장된 블루투스 이름 표시
+        val selectBluetoothButtonText = if (selectedBluetoothName.isNullOrEmpty()) {
+            "선택된 차량 블루투스가 없습니다"
+        } else {
+            "선택된 차량 블루투스: $selectedBluetoothName"
+        }
+        selectBluetoothButton.text = selectBluetoothButtonText
+
         // 이전에 설정한 값이 있다면 가져와서 표시
         val savedStartTime = sharedPreferences.getString("startTime", "00:00")
         val savedEndTime = sharedPreferences.getString("endTime", "12:00")
@@ -129,20 +142,6 @@ class SettingsActivity : AppCompatActivity() {
             false // 24시간 형식이 아닌 AM/PM 형식으로 변경
         )
         timePickerDialog.show()
-    }
-
-    // 사용자가 시간을 설정하면 이를 저장
-    override fun onPause() {
-        super.onPause()
-        val startTime = startTimeEditText.text.toString()
-        val endTime = endTimeEditText.text.toString()
-        val startTime2 = startTimeEditText2.text.toString() // 퇴근 시작 설정 값 저장
-        val endTime2 = endTimeEditText2.text.toString() // 퇴근 종료 설정 값 저장
-
-        saveStartTime(startTime)
-        saveEndTime(endTime)
-        saveStartTime2(startTime2) // 퇴근 시작 설정 값 저장
-        saveEndTime2(endTime2) // 퇴근 종료 설정 값 저장
     }
 
     private fun saveStartTime(startTime: String) {
