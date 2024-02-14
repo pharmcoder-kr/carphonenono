@@ -71,18 +71,6 @@ class SettingsActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // 저장된 블루투스 이름 가져오기
-        val selectedBluetoothName = sharedPreferences.getString("bluetooth_device", "")
-        Log.d("SettingsActivity", "Selected Bluetooth Device: $selectedBluetoothName")
-
-        // 차량 블루투스 설정 버튼 아래에 저장된 블루투스 이름 표시
-        val selectBluetoothButtonText = if (selectedBluetoothName.isNullOrEmpty()) {
-            "선택된 차량 블루투스가 없습니다"
-        } else {
-            "선택된 차량 블루투스: $selectedBluetoothName"
-        }
-        selectBluetoothButton.text = selectBluetoothButtonText
-
         // 이전에 설정한 값이 있다면 가져와서 표시
         val savedStartTime = sharedPreferences.getString("startTime", "00:00")
         val savedEndTime = sharedPreferences.getString("endTime", "12:00")
@@ -109,6 +97,22 @@ class SettingsActivity : AppCompatActivity() {
         endTimeEditText2.setOnClickListener {
             showTimePickerDialog(endTimeEditText2) // 퇴근 종료 설정 다이얼로그 열기
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        // 저장된 블루투스 이름 가져오기
+        val selectedBluetoothName = sharedPreferences.getString("bluetooth_device", "")
+        Log.d("SettingsActivity", "Selected Bluetooth Device: $selectedBluetoothName")
+
+        // 차량 블루투스 설정 버튼 아래에 저장된 블루투스 이름 표시
+        val selectBluetoothButtonText = if (selectedBluetoothName.isNullOrEmpty()) {
+            "선택된 차량 블루투스가 없습니다"
+        } else {
+            "선택된 차량 블루투스: $selectedBluetoothName"
+        }
+        selectBluetoothButton.text = selectBluetoothButtonText
     }
 
     private fun isAutoStartEnabled(): Boolean {

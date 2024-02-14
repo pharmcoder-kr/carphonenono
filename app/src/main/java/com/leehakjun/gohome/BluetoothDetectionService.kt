@@ -20,7 +20,7 @@ import androidx.core.content.ContextCompat
 
 class BluetoothDetectionService : Service() {
 
-    private val TAG = "com.leehakjun.gohome.BluetoothDetection"
+    private val TAG = "BluetoothDetection"
 
     private val NOTIFICATION_CHANNEL_ID = "BluetoothDetectionChannel"
     private val NOTIFICATION_CHANNEL_NAME = "Bluetooth Detection"
@@ -44,50 +44,38 @@ class BluetoothDetectionService : Service() {
 
         val sharedPreferences = getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
         val targetBluetoothDeviceAddress = sharedPreferences.getString("bluetooth_device_address", "")
+        val targetBluetoothDeviceName = sharedPreferences.getString("bluetooth_device", "")
+
+        Log.d(TAG, "Saved Bluetooth Device Address: $targetBluetoothDeviceAddress")
+        Log.d(TAG, "Saved Bluetooth Device Name: $targetBluetoothDeviceName")
 
         if (bluetoothAdapter.isEnabled && !targetBluetoothDeviceAddress.isNullOrEmpty()) {
-            Log.d(TAG, "BluetoothAdapter is enabled and target Bluetooth device name is not empty")
+            Log.d(TAG, "BluetoothAdapter is enabled and target Bluetooth device address is not empty")
 
-            // 연결 상태 확인
-            var isDeviceConnected = false
-            for (device in bluetoothAdapter.bondedDevices) {
-                val bondState = device.bondState
-                if (device.address == targetBluetoothDeviceAddress && bondState == BluetoothDevice.BOND_BONDED) {
-                    Log.d(TAG, "Target Bluetooth device connected: ${device.name} - ${device.address}")
-                    isDeviceConnected = true
-                    break
+            // 연결된 장치 목록 가져오기
+            val connectedDevices = bluetoothAdapter.bondedDevices
+
+            // 목록에서 타겟 디바이스 찾기
+            var isTargetDeviceConnected = false
+            for (device in connectedDevices) {
+                if (device.address == targetBluetoothDeviceAddress) {
+                    val bondState = device.bondState
+                    if (bondState == BluetoothDevice.BOND_BONDED) {
+                        Log.d(TAG, "Target Bluetooth device found and bonded: ${device.name} - ${device.address}")
+                        isTargetDeviceConnected = true
+                        break
+                    }
                 }
             }
 
-            if (!isDeviceConnected) {
+            if (!isTargetDeviceConnected) {
                 Log.d(TAG, "Target Bluetooth device is not connected.")
-
-                // 디바이스 목록 확인
-                for (device in bluetoothAdapter.bondedDevices) {
-                    Log.d(TAG, "Bonded device: ${device.name} - ${device.address}")
-                }
             }
         } else {
-            Log.d(TAG, "BluetoothAdapter is not enabled or target Bluetooth device name is empty")
+            Log.d(TAG, "BluetoothAdapter is not enabled or target Bluetooth device address is empty")
         }
 
         return START_NOT_STICKY
-    }
-
-    private fun startApp() {
-        Log.d(TAG, "Starting the application")
-        val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
-        launchIntent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        val pendingIntent = PendingIntent.getActivity(this, 0, launchIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-        try {
-            pendingIntent.send()
-        } catch (e: PendingIntent.CanceledException) {
-            Log.e(TAG, "Failed to start the application", e)
-        }
-    }
-
-    override fun onBind(intent: Intent?): IBinder? {
-        return null
     }
 
     private fun createNotificationChannel() {
@@ -108,5 +96,9 @@ class BluetoothDetectionService : Service() {
             .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setContentIntent(pendingIntent)
             .build()
+    }
+
+    override fun onBind(intent: Intent?): IBinder? {
+        return null
     }
 }
