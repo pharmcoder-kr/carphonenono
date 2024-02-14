@@ -86,12 +86,13 @@ class BluetoothSettingsActivity : AppCompatActivity() {
         }
     }
 
-    private fun saveSelectedBluetoothDevice(deviceName: String) {
+    private fun saveSelectedBluetoothDevice(deviceAddress: String) {
         val sharedPreferences = getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
-        editor.putString("bluetooth_device", deviceName)
+        editor.putString("bluetooth_device_address", deviceAddress)
         editor.apply()
     }
+
 
     private fun updateSelectedBluetoothText(deviceName: String?) {
         if (deviceName != null) {

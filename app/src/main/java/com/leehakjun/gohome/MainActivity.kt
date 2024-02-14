@@ -65,6 +65,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // BluetoothDetectionService 시작
+        val serviceIntent = Intent(this, BluetoothDetectionService::class.java)
+        startService(serviceIntent)
+
         sharedPreferences = getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
 
         // 블루투스 및 위치 권한 요청
