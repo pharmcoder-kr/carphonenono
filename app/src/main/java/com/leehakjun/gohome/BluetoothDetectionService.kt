@@ -8,8 +8,10 @@ import android.app.PendingIntent
 import android.app.Service
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.IBinder
@@ -17,6 +19,7 @@ import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import java.lang.reflect.Method
 
 class BluetoothDetectionService : Service() {
 
@@ -25,6 +28,47 @@ class BluetoothDetectionService : Service() {
     private val NOTIFICATION_CHANNEL_ID = "BluetoothDetectionChannel"
     private val NOTIFICATION_CHANNEL_NAME = "Bluetooth Detection"
     private val NOTIFICATION_ID = 12345
+
+    private val bluetoothStateReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            when (intent?.action) {
+                BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED -> {
+                    val state = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE, BluetoothAdapter.ERROR)
+                    when (state) {
+                        BluetoothAdapter.STATE_CONNECTED -> {
+                            // Bluetooth가 연결된 경우
+                            Log.d(TAG, "Bluetooth connected")
+                            // 연결된 장치의 정보 가져오기
+                            val device = intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
+                            // 연결된 장치의 주소와 target Bluetooth 장치의 주소 비교하기
+                            val sharedPreferences = context?.getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
+                            val targetBluetoothDeviceAddress = sharedPreferences?.getString("bluetooth_device_address", "")
+                            if (device?.address == targetBluetoothDeviceAddress) {
+                                Log.d(TAG, "Connected to target Bluetooth device: ${device?.name} - ${device?.address}")
+                                // 여기서 필요한 로직 실행
+                                // SharedPreferences에 저장된 target 블루투스의 주소와 일치하면 앱을 실행하는 로직을 추가합니다.
+                                val packageManager = packageManager
+                                val intent = packageManager.getLaunchIntentForPackage("com.leehakjun.gohome")
+
+                                if (intent != null) {
+                                    intent.addCategory(Intent.CATEGORY_LAUNCHER)
+                                    startActivity(intent)
+                                } else {
+                                    Log.e(TAG, "Unable to launch application. Package not found.")
+                                }
+                            }
+
+                        }
+                        BluetoothAdapter.STATE_DISCONNECTED -> {
+                            // Bluetooth가 연결이 끊긴 경우
+                            Log.d(TAG, "Bluetooth disconnected")
+                            // 여기서 필요한 로직 실행
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.d(TAG, "BluetoothDetectionService started")
@@ -42,38 +86,11 @@ class BluetoothDetectionService : Service() {
             return START_NOT_STICKY
         }
 
-        val sharedPreferences = getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
-        val targetBluetoothDeviceAddress = sharedPreferences.getString("bluetooth_device_address", "")
-        val targetBluetoothDeviceName = sharedPreferences.getString("bluetooth_device", "")
+        // Bluetooth 상태 변경 이벤트 수신 등록
+        val filter = IntentFilter(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)
+        registerReceiver(bluetoothStateReceiver, filter)
 
-        Log.d(TAG, "Saved Bluetooth Device Address: $targetBluetoothDeviceAddress")
-        Log.d(TAG, "Saved Bluetooth Device Name: $targetBluetoothDeviceName")
-
-        if (bluetoothAdapter.isEnabled && !targetBluetoothDeviceAddress.isNullOrEmpty()) {
-            Log.d(TAG, "BluetoothAdapter is enabled and target Bluetooth device address is not empty")
-
-            // 연결된 장치 목록 가져오기
-            val connectedDevices = bluetoothAdapter.bondedDevices
-
-            // 목록에서 타겟 디바이스 찾기
-            var isTargetDeviceConnected = false
-            for (device in connectedDevices) {
-                if (device.address == targetBluetoothDeviceAddress) {
-                    val bondState = device.bondState
-                    if (bondState == BluetoothDevice.BOND_BONDED) {
-                        Log.d(TAG, "Target Bluetooth device found and bonded: ${device.name} - ${device.address}")
-                        isTargetDeviceConnected = true
-                        break
-                    }
-                }
-            }
-
-            if (!isTargetDeviceConnected) {
-                Log.d(TAG, "Target Bluetooth device is not connected.")
-            }
-        } else {
-            Log.d(TAG, "BluetoothAdapter is not enabled or target Bluetooth device address is empty")
-        }
+        // 나머지 코드 생략
 
         return START_NOT_STICKY
     }
@@ -100,5 +117,15 @@ class BluetoothDetectionService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
+    }
+
+    private fun isConnected(device: BluetoothDevice): Boolean {
+        return try {
+            val method: Method = device.javaClass.getMethod("isConnected")
+            val connected = method.invoke(device) as Boolean
+            connected
+        } catch (e: Exception) {
+            throw IllegalStateException(e)
+        }
     }
 }
