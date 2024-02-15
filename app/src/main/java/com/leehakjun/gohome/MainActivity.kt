@@ -65,9 +65,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // BluetoothDetectionService 시작
+        // 서비스 시작
         val serviceIntent = Intent(this, BluetoothDetectionService::class.java)
-        startService(serviceIntent)
+        ContextCompat.startForegroundService(this, serviceIntent)
+
 
         sharedPreferences = getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
 
