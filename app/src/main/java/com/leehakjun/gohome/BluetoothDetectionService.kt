@@ -22,7 +22,30 @@ import androidx.core.content.ContextCompat
 import java.lang.reflect.Method
 
 class BluetoothDetectionService : Service() {
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.d(TAG, "BluetoothDetectionService started")
 
+        // Foreground Service로 설정
+        createNotificationChannel()
+        val notification = createNotification()
+        startForeground(NOTIFICATION_ID, notification)
+
+        // 블루투스 상태 감지 및 처리
+        val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+        if (bluetoothAdapter == null) {
+            Log.d(TAG, "BluetoothAdapter is null. Stopping service.")
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
+        // Bluetooth 상태 변경 이벤트 수신 등록
+        val filter = IntentFilter(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)
+        registerReceiver(bluetoothStateReceiver, filter)
+
+        // 나머지 코드 생략
+
+        return START_STICKY
+    }
     private val TAG = "BluetoothDetection"
 
     private val NOTIFICATION_CHANNEL_ID = "BluetoothDetectionChannel"
@@ -36,14 +59,23 @@ class BluetoothDetectionService : Service() {
         if (device?.address == targetBluetoothDeviceAddress) {
             Log.d(TAG, "Connected to target Bluetooth device: ${device?.name} - ${device?.address}")
             // 여기서 필요한 로직 실행
-            // SharedPreferences에 저장된 target 블루투스의 주소와 일치하면 MainActivity를 띄웁니다.
-            val mainActivityIntent = Intent(context, MainActivity::class.java) // MainActivity를 명시적으로 지정
-            mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) // FLAG_ACTIVITY_NEW_TASK 플래그 추가
-            Log.d(TAG, "Launching MainActivity...")
-            context?.startActivity(mainActivityIntent)
-            Log.d(TAG, "MainActivity started.")
+            // SharedPreferences에 저장된 target 블루투스의 주소와 일치하면 com.leehakjun.gohome 어플리케이션을 띄웁니다.
+            val packageName = "com.leehakjun.gohome"
+            val mainActivityIntent = context?.packageManager?.getLaunchIntentForPackage(packageName)
+            mainActivityIntent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            if (mainActivityIntent != null) {
+                Log.d(TAG, "Launching $packageName...")
+                context.startActivity(mainActivityIntent)
+                Log.d(TAG, "$packageName started.")
+            } else {
+                Log.e(TAG, "$packageName not found.")
+            }
         }
     }
+
+
+
+
 
 
 
@@ -72,30 +104,7 @@ class BluetoothDetectionService : Service() {
         }
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.d(TAG, "BluetoothDetectionService started")
 
-        // Foreground Service로 설정
-        createNotificationChannel()
-        val notification = createNotification()
-        startForeground(NOTIFICATION_ID, notification)
-
-        // 블루투스 상태 감지 및 처리
-        val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-        if (bluetoothAdapter == null) {
-            Log.d(TAG, "BluetoothAdapter is null. Stopping service.")
-            stopSelf()
-            return START_NOT_STICKY
-        }
-
-        // Bluetooth 상태 변경 이벤트 수신 등록
-        val filter = IntentFilter(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)
-        registerReceiver(bluetoothStateReceiver, filter)
-
-        // 나머지 코드 생략
-
-        return START_NOT_STICKY
-    }
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

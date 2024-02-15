@@ -11,6 +11,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.PowerManager
+import android.provider.Settings
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
@@ -26,7 +27,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var elapsedTimeTextView: TextView
     private lateinit var recordTextView: TextView
     private lateinit var scoreTextView: TextView
-
+    companion object {
+        // 임의의 정수로 REQUEST_CODE를 정의합니다.
+        // 이 값은 액티비티 결과를 처리할 때 사용됩니다.
+        private const val REQUEST_CODE = 101 // 또는 다른 임의의 정수
+    }
     private lateinit var powerManager: PowerManager
     private lateinit var sharedPreferences: SharedPreferences
 
@@ -65,10 +70,14 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // 서비스 시작
-        val serviceIntent = Intent(this, BluetoothDetectionService::class.java)
-        ContextCompat.startForegroundService(this, serviceIntent)
+        if (!Settings.canDrawOverlays(this)) {
+            val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                Uri.parse("package:$packageName"))
+            startActivityForResult(intent, REQUEST_CODE)
+        }
 
+        val serviceIntent = Intent(this, BluetoothDetectionService::class.java)
+        startService(serviceIntent)
 
         sharedPreferences = getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
 
