@@ -14,13 +14,6 @@
         android:textOn="자동 시작 On"
         android:layout_marginTop="20dp"/>
 
-    <Button
-        android:id="@+id/routineButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="루틴 설정"
-        android:layout_marginTop="20dp"/>
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

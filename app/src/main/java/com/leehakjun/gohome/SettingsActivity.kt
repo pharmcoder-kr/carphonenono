@@ -1,7 +1,6 @@
 package com.leehakjun.gohome
 
 import android.app.TimePickerDialog
-import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -21,7 +20,6 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var startTimeEditText2: EditText // 퇴근 시작 설정 EditText 추가
     private lateinit var endTimeEditText2: EditText // 퇴근 종료 설정 EditText 추가
     private lateinit var sharedPreferences: SharedPreferences
-    private lateinit var routineButton: Button // 루틴 설정 버튼 추가
     private lateinit var resetButton: Button // 출퇴근 시간 설정 초기화 버튼 추가
     private lateinit var selectBluetoothButton: Button // 블루투스 설정 버튼 추가
 
@@ -44,18 +42,6 @@ class SettingsActivity : AppCompatActivity() {
         endTimeEditText = findViewById(R.id.endTimeEditText)
         startTimeEditText2 = findViewById(R.id.startTimeEditText2) // 퇴근 시작 설정 EditText 연결
         endTimeEditText2 = findViewById(R.id.endTimeEditText2) // 퇴근 종료 설정 EditText 연결
-
-        routineButton = findViewById(R.id.routineButton) // 루틴 설정 버튼 연결
-        routineButton.setOnClickListener {
-            // 모드 및 루틴 어플로 연결하는 코드
-            val intent = Intent()
-            intent.setClassName("com.samsung.android.app.routines", "com.samsung.android.app.routines.ui.main.RoutineLaunchActivity")
-            try {
-                startActivity(intent)
-            } catch (e: ActivityNotFoundException) {
-                // "모드 및 루틴" 액티비티를 찾을 수 없는 경우 처리
-            }
-        }
 
         resetButton = findViewById(R.id.resetButton) // 출퇴근 시간 설정 초기화 버튼 연결
         resetButton.setOnClickListener {
