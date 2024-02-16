@@ -96,45 +96,55 @@ class MainActivity : AppCompatActivity() {
         Log.d("MainActivity", "isTimerRunning: $isTimerRunning")
         Log.d("MainActivity", "isAutoStartEnabled: ${isAutoStartEnabled()}")
 
-        // 수정된 부분: startButton.setOnClickListener 블록을 아래로 이동하여 수정
+        // 시작 버튼 클릭 리스너 설정
         startButton.setOnClickListener {
             if (!isTimerRunning) {
-                val currentTime = getCurrentTime()
-                val workStartTime = sharedPreferences.getString("startTime", "")
-                val workEndTime = sharedPreferences.getString("endTime", "")
-                val workStartTime2 = sharedPreferences.getString("startTime2", "")
-                val workEndTime2 = sharedPreferences.getString("endTime2", "")
-
-                workStartTime?.let { start ->
-                    workEndTime?.let { end ->
-                        if (currentTime in start..end) {
-                            launchShortcut("회사")
-                        }
-                    }
-                }
-
-                workStartTime2?.let { start2 ->
-                    workEndTime2?.let { end2 ->
-                        if (currentTime in start2..end2) {
-                            launchShortcut("우리집")
-                        }
-                    }
-                }
-
+                checkWorkTimeAndLaunchShortcut()
                 startTimer()
                 isTimerRunning = true
             }
         }
 
-        // 수정된 부분: startButton.performClick() 호출을 이 블록 밖으로 이동하여 수정
-        if (!isTimerRunning && isAutoStartEnabled()) {
+        // 자동 시작 기능이 활성화되어 있고, 현재 시간이 출퇴근 시간 범위 내에 있으면 시작 버튼 클릭
+        if (!isTimerRunning && isAutoStartEnabled() && isWithinWorkTime()) {
+            checkWorkTimeAndLaunchShortcut()
             startButton.performClick()
         }
 
+        // 종료 버튼 클릭 리스너 설정
         stopButton.setOnClickListener {
             if (isTimerRunning) {
                 stopTimer()
                 isTimerRunning = false
+            }
+        }
+
+        // 현재 시간이 출퇴근 시간 범위에 들어가지 않으면 버튼 비활성화 및 색상 변경
+        if (!isWithinWorkTime()) {
+            disableButtons()
+        }
+    }
+
+    private fun checkWorkTimeAndLaunchShortcut() {
+        val currentTime = getCurrentTime()
+        val workStartTime = sharedPreferences.getString("startTime", "")
+        val workEndTime = sharedPreferences.getString("endTime", "")
+        val workStartTime2 = sharedPreferences.getString("startTime2", "")
+        val workEndTime2 = sharedPreferences.getString("endTime2", "")
+
+        workStartTime?.let { start ->
+            workEndTime?.let { end ->
+                if (currentTime in start..end) {
+                    launchShortcut("회사")
+                }
+            }
+        }
+
+        workStartTime2?.let { start2 ->
+            workEndTime2?.let { end2 ->
+                if (currentTime in start2..end2) {
+                    launchShortcut("우리집")
+                }
             }
         }
     }
@@ -232,6 +242,31 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Log.e("LaunchShortcut", "Error launching shortcut: ${e.message}")
         }
+    }
+
+    private fun isWithinWorkTime(): Boolean {
+        val currentTime = getCurrentTime()
+        val workStartTime = sharedPreferences.getString("startTime", "")
+        val workEndTime = sharedPreferences.getString("endTime", "")
+        val workStartTime2 = sharedPreferences.getString("startTime2", "")
+        val workEndTime2 = sharedPreferences.getString("endTime2", "")
+
+        val isInFirstWorkTime = isInTimeRange(currentTime, workStartTime, workEndTime)
+        val isInSecondWorkTime = isInTimeRange(currentTime, workStartTime2, workEndTime2)
+
+        return isInFirstWorkTime || isInSecondWorkTime
+    }
+
+    private fun isInTimeRange(currentTime: String, startTime: String?, endTime: String?): Boolean {
+        if (startTime == null || endTime == null) return false
+        return currentTime in startTime..endTime
+    }
+
+    private fun disableButtons() {
+        startButton.isEnabled = false
+        stopButton.isEnabled = false
+        startButton.setBackgroundColor(ContextCompat.getColor(this, android.R.color.darker_gray))
+        stopButton.setBackgroundColor(ContextCompat.getColor(this, android.R.color.darker_gray))
     }
 
     override fun onResume() {
