@@ -35,6 +35,9 @@ class SettingsActivity : AppCompatActivity() {
         autoStartToggleButton.isChecked = isAutoStartEnabled()
         autoStartToggleButton.setOnCheckedChangeListener { _, isChecked ->
             saveAutoStartState(isChecked)
+            if (isChecked) {
+                startMainScreen()
+            }
         }
 
         startTimeEditText = findViewById(R.id.startTimeEditText)
@@ -97,6 +100,11 @@ class SettingsActivity : AppCompatActivity() {
         endTimeEditText2.setOnClickListener {
             showTimePickerDialog(endTimeEditText2) // 퇴근 종료 설정 다이얼로그 열기
         }
+    }
+
+    private fun startMainScreen() {
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
     }
 
     override fun onResume() {

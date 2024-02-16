@@ -27,20 +27,18 @@ class MainActivity : AppCompatActivity() {
     private lateinit var elapsedTimeTextView: TextView
     private lateinit var recordTextView: TextView
     private lateinit var scoreTextView: TextView
-    companion object {
-        // 임의의 정수로 REQUEST_CODE를 정의합니다.
-        // 이 값은 액티비티 결과를 처리할 때 사용됩니다.
-        private const val REQUEST_CODE = 101 // 또는 다른 임의의 정수
-    }
     private lateinit var powerManager: PowerManager
     private lateinit var sharedPreferences: SharedPreferences
-
     private var countDownTimer: CountDownTimer? = null
     private var isTimerRunning = false
     private var elapsedTime: Long = 0L
     private var recordText: String = ""
 
-    private val screenStateReceiver = object : android.content.BroadcastReceiver() {
+    companion object {
+        private const val REQUEST_CODE = 101
+    }
+
+    private val screenStateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
                 Intent.ACTION_SCREEN_OFF -> {
@@ -60,7 +58,6 @@ class MainActivity : AppCompatActivity() {
     private val settingsChangedReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action == "com.leehakjun.gohome.SETTINGS_CHANGED") {
-                // 화면을 업데이트합니다.
                 updateUI()
             }
         }
@@ -80,8 +77,6 @@ class MainActivity : AppCompatActivity() {
         startService(serviceIntent)
 
         sharedPreferences = getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
-
-        // 블루투스 및 위치 권한 요청
         requestPermissions()
 
         startButton = findViewById(R.id.startButton)
@@ -98,10 +93,10 @@ class MainActivity : AppCompatActivity() {
 
         powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
 
-        if (!isTimerRunning && isAutoStartEnabled()) {
-            startButton.performClick()
-        }
+        Log.d("MainActivity", "isTimerRunning: $isTimerRunning")
+        Log.d("MainActivity", "isAutoStartEnabled: ${isAutoStartEnabled()}")
 
+        // 수정된 부분: startButton.setOnClickListener 블록을 아래로 이동하여 수정
         startButton.setOnClickListener {
             if (!isTimerRunning) {
                 val currentTime = getCurrentTime()
@@ -110,20 +105,18 @@ class MainActivity : AppCompatActivity() {
                 val workStartTime2 = sharedPreferences.getString("startTime2", "")
                 val workEndTime2 = sharedPreferences.getString("endTime2", "")
 
-                // 출근 시간 범위 확인
                 workStartTime?.let { start ->
                     workEndTime?.let { end ->
                         if (currentTime in start..end) {
-                            launchShortcut("회사") // 출근 시간에 "회사" 숏컷 실행
+                            launchShortcut("회사")
                         }
                     }
                 }
 
-                // 퇴근 시간 범위 확인
                 workStartTime2?.let { start2 ->
                     workEndTime2?.let { end2 ->
                         if (currentTime in start2..end2) {
-                            launchShortcut("우리집") // 퇴근 시간에 "우리집" 숏컷 실행
+                            launchShortcut("우리집")
                         }
                     }
                 }
@@ -131,6 +124,11 @@ class MainActivity : AppCompatActivity() {
                 startTimer()
                 isTimerRunning = true
             }
+        }
+
+        // 수정된 부분: startButton.performClick() 호출을 이 블록 밖으로 이동하여 수정
+        if (!isTimerRunning && isAutoStartEnabled()) {
+            startButton.performClick()
         }
 
         stopButton.setOnClickListener {
@@ -141,7 +139,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     private fun getCurrentTime(): String {
         val calendar = Calendar.getInstance()
         val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
@@ -150,7 +147,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startTimer() {
-        // 기존 타이머 설정 코드
         countDownTimer?.cancel()
         countDownTimer = object : CountDownTimer(Long.MAX_VALUE, 1000) {
             override fun onTick(millisUntilFinished: Long) {
@@ -215,7 +211,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun isAutoStartEnabled(): Boolean {
-        return sharedPreferences.getBoolean("autoStartEnabled", true)
+        return sharedPreferences.getBoolean("autoStartEnabled", false)
     }
 
     private fun launchShortcut(shortcutType: String) {
@@ -225,7 +221,7 @@ class MainActivity : AppCompatActivity() {
         if (shortcutType == "우리집") {
             packageName = "com.skt.tmap.ku"
             data = "tmap://goto?code=1"
-        } else { // "회사" 숏컷
+        } else {
             packageName = "com.skt.tmap.ku"
             data = "tmap://goto?code=2"
         }
@@ -254,7 +250,6 @@ class MainActivity : AppCompatActivity() {
 
         showRecords()
 
-        // 사용자에게 권한 요청 다이얼로그를 다시 표시
         if (!hasPermissions()) {
             showPermissionRequestDialog()
         }
@@ -271,7 +266,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun requestPermissions() {
-        // 블루투스 및 위치 권한 요청
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             ActivityCompat.requestPermissions(
                 this,
@@ -286,28 +280,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun hasPermissions(): Boolean {
-        // 퍼미션이 모두 허용되었는지 확인
         return (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) == android.content.pm.PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADMIN) == android.content.pm.PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED)
     }
+
     private fun updateUI() {
-        // 설정이 변경될 때마다 UI를 업데이트하는 로직을 여기에 추가하세요.
-        // 예를 들어, 설정이 변경될 때마다 화면의 텍스트나 버튼 등을 업데이트할 수 있습니다.
-        // 여기에 필요한 로직을 추가하세요.
+        // Update UI logic here if needed
     }
 
     private fun showPermissionRequestDialog() {
-        // 사용자에게 권한을 요청하는 다이얼로그 표시
         AlertDialog.Builder(this)
-            .setTitle("권한 요청")
-            .setMessage("이 앱을 사용하기 위해서는 블루투스 및 위치 권한이 필요합니다.")
-            .setPositiveButton("확인") { _, _ ->
-                // 사용자가 확인 버튼을 누를 경우, 권한을 다시 요청
+            .setTitle("Permission Request")
+            .setMessage("This app requires Bluetooth and Location permissions to function.")
+            .setPositiveButton("OK") { _, _ ->
                 requestPermissions()
             }
-            .setNegativeButton("취소") { dialog, _ ->
-                // 사용자가 취소 버튼을 누를 경우, 앱을 종료하거나 추가적인 처리를 수행할 수 있음
+            .setNegativeButton("Cancel") { dialog, _ ->
                 dialog.dismiss()
                 finish()
             }
