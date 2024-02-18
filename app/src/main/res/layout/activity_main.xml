@@ -57,41 +57,28 @@
         android:id="@+id/recordTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
         android:text=""
-        app:layout_constraintTop_toBottomOf="@+id/elapsedTimeTextView"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/explanationTextView"
-        android:layout_marginTop="20dp"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/elapsedTimeTextView" />
 
     <!-- Add the explanationTextView -->
-    <TextView
-        android:id="@+id/explanationTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="휴폰SCORE란? 핸드폰 사용시간이 길수록 점수가 깎이게 된다.\n1000점 만점에서 아래의 기준으로 점수가 깎인다.\n0~10초: 초당 1점씩 감점\n11~30초: 초당 2점씩 감점\n31~60초: 초당 3점씩 감점"
-        app:layout_constraintTop_toBottomOf="@+id/recordTextView"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/scoreTextView"
-        android:layout_marginTop="20dp"
-        android:textSize="16sp"
-        android:textColor="@android:color/black"
-        android:padding="16dp"/>
 
     <!-- Add the scoreTextView -->
     <TextView
         android:id="@+id/scoreTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
         android:padding="16dp"
-        android:text="휴폰SCORE: 1000"
+        android:text=""
         android:textColor="@android:color/holo_red_dark"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/explanationTextView" />
+        tools:layout_editor_absoluteY="276dp"
+        tools:ignore="MissingConstraints" />
 
     <!-- Add the autoStartText -->
 

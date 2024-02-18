@@ -173,8 +173,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun stopTimer() {
         countDownTimer?.cancel()
-        saveRecord(elapsedTime)
-        showRecords()
         elapsedTime = 0L
         updateTimerText(elapsedTime)
     }
@@ -187,11 +185,6 @@ class MainActivity : AppCompatActivity() {
         elapsedTimeTextView.text = formattedTime
     }
 
-    private fun saveRecord(record: Long) {
-        recordText = "$recordText\n${formatRecord(record)}"
-        val score = calculateScore(record)
-        updateScoreText(score)
-    }
 
     private fun formatRecord(record: Long): String {
         val seconds = record / 1000
@@ -200,20 +193,8 @@ class MainActivity : AppCompatActivity() {
         return String.format("%02d:%02d:%02d", hours, minutes % 60, seconds % 60)
     }
 
-    private fun calculateScore(elapsedTime: Long): Int {
-        val seconds = elapsedTime / 1000
-        return when {
-            seconds <= 10 -> (1000 - seconds).toInt()
-            seconds <= 30 -> (1000 - (10 + (seconds - 10) * 2)).toInt()
-            seconds <= 60 -> (1000 - (10 + 20 + (seconds - 30) * 3)).toInt()
-            else -> (1000 - (10 + 20 + 90)).toInt()
-        }
-    }
 
-    private fun updateScoreText(score: Int) {
-        val scoreText = getString(R.string.score_format, score)
-        scoreTextView.text = scoreText
-    }
+
 
     private fun showRecords() {
         recordTextView.text = recordText
