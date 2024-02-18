@@ -10,15 +10,15 @@
         android:id="@+id/autoStartToggleButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
         android:textOff="자동 시작 Off"
-        android:textOn="자동 시작 On"
-        android:layout_marginTop="20dp"/>
+        android:textOn="자동 시작 On" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="20dp">
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal">
 
         <EditText
             android:id="@+id/startTimeEditText"
@@ -55,8 +55,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="10dp">
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
 
         <EditText
             android:id="@+id/startTimeEditText2"
@@ -94,15 +94,24 @@
         android:id="@+id/resetButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="출퇴근 시간 설정 초기화"
-        android:layout_marginTop="20dp"/>
+        android:layout_marginTop="20dp"
+        android:text="출퇴근 시간 설정 초기화" />
 
     <Button
         android:id="@+id/selectBluetoothButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="차량 블루투스 설정"
-        android:layout_marginTop="20dp"/>
+        android:layout_marginTop="20dp"
+        android:text="차량 블루투스 설정" />
+
+    <Button
+        android:id="@+id/saveButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/selectBluetoothButton"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:text="저장" />
 
 
 </LinearLayout>
