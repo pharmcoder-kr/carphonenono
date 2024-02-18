@@ -127,10 +127,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkWorkTimeAndLaunchShortcut() {
         val currentTime = getCurrentTime()
-        val workStartTime = sharedPreferences.getString("startTime", "")
-        val workEndTime = sharedPreferences.getString("endTime", "")
-        val workStartTime2 = sharedPreferences.getString("startTime2", "")
-        val workEndTime2 = sharedPreferences.getString("endTime2", "")
+        val workStartTime = sharedPreferences.getString("startTime", "00:00")
+        val workEndTime = sharedPreferences.getString("endTime", "12:00")
+        val workStartTime2 = sharedPreferences.getString("startTime2", "12:00")
+        val workEndTime2 = sharedPreferences.getString("endTime2", "24:00")
 
         workStartTime?.let { start ->
             workEndTime?.let { end ->
@@ -246,10 +246,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun isWithinWorkTime(): Boolean {
         val currentTime = getCurrentTime()
-        val workStartTime = sharedPreferences.getString("startTime", "")
-        val workEndTime = sharedPreferences.getString("endTime", "")
-        val workStartTime2 = sharedPreferences.getString("startTime2", "")
-        val workEndTime2 = sharedPreferences.getString("endTime2", "")
+        val workStartTime = sharedPreferences.getString("startTime", "00:00")
+        val workEndTime = sharedPreferences.getString("endTime", "12:00")
+        val workStartTime2 = sharedPreferences.getString("startTime2", "12:00")
+        val workEndTime2 = sharedPreferences.getString("endTime2", "24:00")
 
         val isInFirstWorkTime = isInTimeRange(currentTime, workStartTime, workEndTime)
         val isInSecondWorkTime = isInTimeRange(currentTime, workStartTime2, workEndTime2)
