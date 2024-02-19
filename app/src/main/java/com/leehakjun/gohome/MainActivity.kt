@@ -19,6 +19,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.mikhaellopez.circularprogressbar.CircularProgressBar
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -32,6 +33,8 @@ class MainActivity : AppCompatActivity() {
     private var isTimerRunning = false
     private var elapsedTime: Long = 0L
     private var recordText: String = ""
+    private lateinit var circularProgressBar: CircularProgressBar
+    private lateinit var timeRemainingTextView: TextView
 
     companion object {
         private const val REQUEST_CODE = 101
@@ -121,6 +124,8 @@ class MainActivity : AppCompatActivity() {
         if (!isWithinWorkTime()) {
             disableButtons()
         }
+        circularProgressBar = findViewById(R.id.circularProgressBar)
+        timeRemainingTextView = findViewById(R.id.timeRemainingTextView)
     }
 
     private fun checkWorkTimeAndLaunchShortcut() {
@@ -156,14 +161,15 @@ class MainActivity : AppCompatActivity() {
 
     private fun startTimer() {
         countDownTimer?.cancel()
-        countDownTimer = object : CountDownTimer(Long.MAX_VALUE, 1000) {
+        countDownTimer = object : CountDownTimer(60000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 elapsedTime += 1000
                 updateTimerText(elapsedTime)
+                updateCircularProgressBar(millisUntilFinished)
             }
 
             override fun onFinish() {
-                // Not applicable for a countdown timer that runs indefinitely.
+                updateMissionText(false) // 미션 실패 업데이트
             }
         }
         countDownTimer?.start()
@@ -175,6 +181,16 @@ class MainActivity : AppCompatActivity() {
         updateTimerText(elapsedTime)
     }
 
+    private fun updateCircularProgressBar(millisUntilFinished: Long) {
+        val progress = ((60000 - millisUntilFinished).toFloat() / 60000) * 100
+        circularProgressBar.progress = progress
+        val remainingSeconds = millisUntilFinished / 1000
+        if (remainingSeconds > 0) {
+            timeRemainingTextView.text = "${remainingSeconds}초"
+        } else {
+            timeRemainingTextView.text = "미션 실패"
+        }
+    }
     private fun updateTimerText(time: Long) {
         val seconds = time / 1000
         val minutes = seconds / 60
