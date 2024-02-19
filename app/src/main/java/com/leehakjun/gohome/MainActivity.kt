@@ -25,8 +25,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var startButton: Button
     private lateinit var stopButton: Button
     private lateinit var elapsedTimeTextView: TextView
-    private lateinit var recordTextView: TextView
-    private lateinit var scoreTextView: TextView
     private lateinit var missionTextView: TextView
     private lateinit var powerManager: PowerManager
     private lateinit var sharedPreferences: SharedPreferences
@@ -83,8 +81,6 @@ class MainActivity : AppCompatActivity() {
         startButton = findViewById(R.id.startButton)
         stopButton = findViewById(R.id.stopButton)
         elapsedTimeTextView = findViewById(R.id.elapsedTimeTextView)
-        recordTextView = findViewById(R.id.recordTextView)
-        scoreTextView = findViewById(R.id.scoreTextView)
         missionTextView = findViewById(R.id.missionTextView) // 미션 텍스트뷰 초기화
 
         val settingsButton: Button = findViewById(R.id.settingsButton)
