@@ -12,12 +12,12 @@
         android:id="@+id/settingsButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="600dp"
         android:text="설정"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        android:layout_marginTop="600dp" />
 
     <Button
         android:id="@+id/startButton"
@@ -52,20 +52,17 @@
         app:layout_constraintBottom_toTopOf="@+id/recordTextView"
         android:layout_marginTop="20dp"/>
 
-    <!-- Add the recordTextView -->
     <TextView
         android:id="@+id/recordTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
         android:text=""
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/elapsedTimeTextView"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/elapsedTimeTextView" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/scoreTextView"
+        android:layout_marginTop="20dp"/>
 
-    <!-- Add the explanationTextView -->
-
-    <!-- Add the scoreTextView -->
     <TextView
         android:id="@+id/scoreTextView"
         android:layout_width="wrap_content"
@@ -74,14 +71,20 @@
         android:text=""
         android:textColor="@android:color/holo_red_dark"
         android:textSize="18sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintTop_toBottomOf="@+id/recordTextView"
         app:layout_constraintStart_toStartOf="parent"
-        tools:layout_editor_absoluteY="276dp"
-        tools:ignore="MissingConstraints" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Add the autoStartText -->
-
-    <!-- Add the autoStartToggleButton -->
+    <TextView
+        android:id="@+id/missionTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text=""
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/scoreTextView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

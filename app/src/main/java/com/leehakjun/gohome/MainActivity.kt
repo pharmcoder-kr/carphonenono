@@ -27,6 +27,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var elapsedTimeTextView: TextView
     private lateinit var recordTextView: TextView
     private lateinit var scoreTextView: TextView
+    private lateinit var missionTextView: TextView
     private lateinit var powerManager: PowerManager
     private lateinit var sharedPreferences: SharedPreferences
     private var countDownTimer: CountDownTimer? = null
@@ -84,6 +85,7 @@ class MainActivity : AppCompatActivity() {
         elapsedTimeTextView = findViewById(R.id.elapsedTimeTextView)
         recordTextView = findViewById(R.id.recordTextView)
         scoreTextView = findViewById(R.id.scoreTextView)
+        missionTextView = findViewById(R.id.missionTextView) // 미션 텍스트뷰 초기화
 
         val settingsButton: Button = findViewById(R.id.settingsButton)
         settingsButton.setOnClickListener {
@@ -93,31 +95,31 @@ class MainActivity : AppCompatActivity() {
 
         powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
 
-        Log.d("MainActivity", "isTimerRunning: $isTimerRunning")
-        Log.d("MainActivity", "isAutoStartEnabled: ${isAutoStartEnabled()}")
-
         // 시작 버튼 클릭 리스너 설정
         startButton.setOnClickListener {
             if (!isTimerRunning) {
                 checkWorkTimeAndLaunchShortcut()
                 startTimer()
                 isTimerRunning = true
+                updateUI() // UI 업데이트
             }
-        }
-
-        // 자동 시작 기능이 활성화되어 있고, 현재 시간이 출퇴근 시간 범위 내에 있으면 시작 버튼 클릭
-        if (!isTimerRunning && isAutoStartEnabled() && isWithinWorkTime()) {
-            checkWorkTimeAndLaunchShortcut()
-            startButton.performClick()
         }
 
         // 종료 버튼 클릭 리스너 설정
         stopButton.setOnClickListener {
             if (isTimerRunning) {
-                stopTimer()
+
                 isTimerRunning = false
+                // 미션 결과 확인 및 업데이트
+                val missionSuccess = if (elapsedTime <= 60000L) true else false
+                Log.d("ElapsedTime", "Elapsed Time: $elapsedTime") // elapsedTime 값 확인
+                Log.d("MissionSuccess", "Mission Success: $missionSuccess") // missionsuccess 값 확인
+                updateTimerText(elapsedTime)
+                updateMissionText(missionSuccess) // 미션 텍스트 업데이트
+                stopTimer()
             }
         }
+
 
         // 현재 시간이 출퇴근 시간 범위에 들어가지 않으면 버튼 비활성화 및 색상 변경
         if (!isWithinWorkTime()) {
@@ -185,26 +187,6 @@ class MainActivity : AppCompatActivity() {
         elapsedTimeTextView.text = formattedTime
     }
 
-
-    private fun formatRecord(record: Long): String {
-        val seconds = record / 1000
-        val minutes = seconds / 60
-        val hours = minutes / 60
-        return String.format("%02d:%02d:%02d", hours, minutes % 60, seconds % 60)
-    }
-
-
-
-
-    private fun showRecords() {
-        recordTextView.text = recordText
-        recordTextView.setTextColor(ContextCompat.getColor(this, R.color.red))
-    }
-
-    private fun isAutoStartEnabled(): Boolean {
-        return sharedPreferences.getBoolean("autoStartEnabled", false)
-    }
-
     private fun launchShortcut(shortcutType: String) {
         val intent = Intent(Intent.ACTION_VIEW)
         val packageName: String
@@ -264,8 +246,6 @@ class MainActivity : AppCompatActivity() {
             startTimer()
         }
 
-        showRecords()
-
         if (!hasPermissions()) {
             showPermissionRequestDialog()
         }
@@ -303,6 +283,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateUI() {
         // Update UI logic here if needed
+        // 미션 결과를 초기화하기 위해 start 버튼이 클릭될 때 호출
+        missionTextView.text = ""
     }
 
     private fun showPermissionRequestDialog() {
@@ -318,5 +300,19 @@ class MainActivity : AppCompatActivity() {
             }
             .create()
             .show()
+    }
+
+    private fun isAutoStartEnabled(): Boolean {
+        return sharedPreferences.getBoolean("autoStartEnabled", false)
+    }
+
+    private fun updateMissionText(missionSuccess: Boolean) {
+        if (missionSuccess) {
+            missionTextView.text = "축하합니다! 1분 미션 성공!"
+            missionTextView.setTextColor(ContextCompat.getColor(this, R.color.green))
+        } else {
+            missionTextView.text = "1분 미션 실패!"
+            missionTextView.setTextColor(ContextCompat.getColor(this, R.color.red))
+        }
     }
 }
