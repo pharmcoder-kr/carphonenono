@@ -132,6 +132,10 @@ class MainActivity : AppCompatActivity() {
         if (!isWithinWorkTime()) {
             disableButtons()
         }
+        // 자동 시작 설정이 활성화되어 있으면 타이머 자동 시작
+        if (isAutoStartEnabled()) {
+            startButton.performClick() // startButton 클릭 이벤트 프로그래매틱하게 트리거
+        }
     }
 
     private fun checkWorkTimeAndLaunchShortcut() {
