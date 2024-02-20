@@ -19,6 +19,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.mikhaellopez.circularprogressbar.CircularProgressBar
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -32,6 +33,8 @@ class MainActivity : AppCompatActivity() {
     private var isTimerRunning = false
     private var elapsedTime: Long = 0L
     private var recordText: String = ""
+    private lateinit var circularProgressBar: CircularProgressBar
+    private lateinit var timeRemainingTextView: TextView
 
     companion object {
         private const val REQUEST_CODE = 101
@@ -99,8 +102,16 @@ class MainActivity : AppCompatActivity() {
                 isTimerRunning = true
                 updateUI() // UI 업데이트
             }
-        }
 
+        }
+        circularProgressBar = findViewById(R.id.circularProgressBar)
+        timeRemainingTextView = findViewById(R.id.timeRemainingTextView)
+
+        // CircularProgressBar를 100%로 초기화
+        circularProgressBar.progress = 100f
+
+        // timeRemainingTextView의 디폴트 텍스트 설정
+        timeRemainingTextView.text = "카폰노노\n1분미션\n타이머"
         // 종료 버튼 클릭 리스너 설정
         stopButton.setOnClickListener {
             if (isTimerRunning) {
@@ -160,6 +171,7 @@ class MainActivity : AppCompatActivity() {
             override fun onTick(millisUntilFinished: Long) {
                 elapsedTime += 1000
                 updateTimerText(elapsedTime)
+                updateCircularProgressBar(60000L - elapsedTime)
             }
 
             override fun onFinish() {
@@ -174,7 +186,16 @@ class MainActivity : AppCompatActivity() {
         elapsedTime = 0L
         updateTimerText(elapsedTime)
     }
-
+    private fun updateCircularProgressBar(millisUntilFinished: Long) {
+        val progress = millisUntilFinished.toFloat() / 60000 * 100
+        circularProgressBar.progress = progress
+        val remainingSeconds = millisUntilFinished / 1000
+        if (remainingSeconds > 0) {
+            timeRemainingTextView.text = "${remainingSeconds}초"
+        } else {
+            timeRemainingTextView.text = "미션 실패"
+        }
+    }
     private fun updateTimerText(time: Long) {
         val seconds = time / 1000
         val minutes = seconds / 60
