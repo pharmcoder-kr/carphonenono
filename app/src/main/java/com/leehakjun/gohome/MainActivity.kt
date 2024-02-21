@@ -191,15 +191,18 @@ class MainActivity : AppCompatActivity() {
         updateTimerText(elapsedTime)
     }
     private fun updateCircularProgressBar(millisUntilFinished: Long) {
-        val progress = millisUntilFinished.toFloat() / 60000 * 100
-        circularProgressBar.progress = progress
-        val remainingSeconds = millisUntilFinished / 1000
-        if (remainingSeconds > 0) {
+        if (millisUntilFinished > 0) {
+            val progress = millisUntilFinished.toFloat() / 60000 * 100
+            circularProgressBar.progress = progress
+            val remainingSeconds = millisUntilFinished / 1000
             timeRemainingTextView.text = "${remainingSeconds}초"
         } else {
+            circularProgressBar.progress = 100f // 100%로 설정
+            circularProgressBar.progressBarColor = ContextCompat.getColor(this, R.color.red) // 빨간색으로 설정
             timeRemainingTextView.text = "미션 실패"
         }
     }
+
     private fun updateTimerText(time: Long) {
         val seconds = time / 1000
         val minutes = seconds / 60
