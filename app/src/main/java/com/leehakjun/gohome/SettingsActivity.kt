@@ -30,16 +30,6 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_settings)
 
         sharedPreferences = getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
-
-        autoStartToggleButton = findViewById(R.id.autoStartToggleButton)
-        autoStartToggleButton.isChecked = isAutoStartEnabled()
-        autoStartToggleButton.setOnCheckedChangeListener { _, isChecked ->
-            saveAutoStartState(isChecked)
-            if (isChecked) {
-                startMainScreen()
-            }
-        }
-
         startTimeEditText = findViewById(R.id.startTimeEditText)
         endTimeEditText = findViewById(R.id.endTimeEditText)
         startTimeEditText2 = findViewById(R.id.startTimeEditText2) // 퇴근 시작 설정 EditText 연결
