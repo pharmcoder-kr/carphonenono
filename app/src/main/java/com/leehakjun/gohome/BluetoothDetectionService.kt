@@ -61,9 +61,12 @@ class BluetoothDetectionService : Service() {
             // 여기서 필요한 로직 실행
             // SharedPreferences에 저장된 target 블루투스의 주소와 일치하면 com.leehakjun.gohome 어플리케이션을 띄웁니다.
             val packageName = "com.leehakjun.gohome"
-            val mainActivityIntent = context?.packageManager?.getLaunchIntentForPackage(packageName)
-            mainActivityIntent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            if (mainActivityIntent != null) {
+            val mainActivityIntent = Intent(context, MainActivity::class.java).apply {
+                // startButton을 클릭하는 동작을 추가한 인텐트를 전달
+                putExtra("autoStartBluetooth", true)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            if (mainActivityIntent.resolveActivity(context!!.packageManager) != null) {
                 Log.d(TAG, "Launching $packageName...")
                 context.startActivity(mainActivityIntent)
                 Log.d(TAG, "$packageName started.")
@@ -72,6 +75,7 @@ class BluetoothDetectionService : Service() {
             }
         }
     }
+
 
 
 
