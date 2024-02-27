@@ -101,6 +101,8 @@ class MainActivity : AppCompatActivity() {
                 startTimer()
                 isTimerRunning = true
                 updateUI() // UI 업데이트
+                // CircularProgressBar를 초록색으로 초기화
+                circularProgressBar.progressBarColor = ContextCompat.getColor(this, R.color.green)
             }
 
         }
