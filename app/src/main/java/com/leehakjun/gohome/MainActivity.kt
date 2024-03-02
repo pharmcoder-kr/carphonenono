@@ -65,6 +65,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private val screenUnlockedReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == Intent.ACTION_USER_PRESENT) {
+                startButton.isEnabled = false // startButton 비활성화
+                stopButton.isEnabled = false // stopButton 비활성화
+                startButton.postDelayed({
+                    startButton.isEnabled = true // 1초 후 startButton 활성화
+                    stopButton.isEnabled = true // 1초 후 stopButton 활성화
+                }, 1000)
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -97,8 +110,8 @@ class MainActivity : AppCompatActivity() {
         // 시작 버튼 클릭 리스너 설정
         startButton.setOnClickListener {
             if (!isTimerRunning) {
-                checkWorkTimeAndLaunchShortcut()
                 startTimer()
+                checkWorkTimeAndLaunchShortcut()
                 isTimerRunning = true
                 updateUI() // UI 업데이트
                 // CircularProgressBar를 초록색으로 초기화
@@ -263,10 +276,12 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         val filter = IntentFilter().apply {
+            addAction(Intent.ACTION_USER_PRESENT) // 화면 잠금 해제 이벤트 감지
             addAction(Intent.ACTION_SCREEN_ON)
             addAction(Intent.ACTION_SCREEN_OFF)
             addAction("com.leehakjun.gohome.SETTINGS_CHANGED")
         }
+        registerReceiver(screenUnlockedReceiver, filter) // BroadcastReceiver 등록
         registerReceiver(screenStateReceiver, filter)
         registerReceiver(settingsChangedReceiver, filter)
 
@@ -281,6 +296,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
+        unregisterReceiver(screenUnlockedReceiver) // BroadcastReceiver 해제
         unregisterReceiver(screenStateReceiver)
         unregisterReceiver(settingsChangedReceiver)
 
