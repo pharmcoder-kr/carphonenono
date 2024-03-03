@@ -10,6 +10,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.os.Handler
 import android.os.PowerManager
 import android.provider.Settings
 import android.util.Log
@@ -65,18 +66,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private val screenUnlockedReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            if (intent?.action == Intent.ACTION_USER_PRESENT) {
-                startButton.isEnabled = false // startButton 비활성화
-                stopButton.isEnabled = false // stopButton 비활성화
-                startButton.postDelayed({
-                    startButton.isEnabled = true // 1초 후 startButton 활성화
-                    stopButton.isEnabled = true // 1초 후 stopButton 활성화
-                }, 1000)
-            }
-        }
-    }
+
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -281,7 +273,7 @@ class MainActivity : AppCompatActivity() {
             addAction(Intent.ACTION_SCREEN_OFF)
             addAction("com.leehakjun.gohome.SETTINGS_CHANGED")
         }
-        registerReceiver(screenUnlockedReceiver, filter) // BroadcastReceiver 등록
+
         registerReceiver(screenStateReceiver, filter)
         registerReceiver(settingsChangedReceiver, filter)
 
@@ -296,7 +288,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        unregisterReceiver(screenUnlockedReceiver) // BroadcastReceiver 해제
+
         unregisterReceiver(screenStateReceiver)
         unregisterReceiver(settingsChangedReceiver)
 
