@@ -20,6 +20,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.mikhaellopez.circularprogressbar.CircularProgressBar
 import java.util.*
 
@@ -108,6 +109,12 @@ class MainActivity : AppCompatActivity() {
                 updateUI() // UI 업데이트
                 // CircularProgressBar를 초록색으로 초기화
                 circularProgressBar.progressBarColor = ContextCompat.getColor(this, R.color.green)
+                // Overlay에 CircularProgressBar와 TextView의 값을 전송
+                sendValuesToOverlay()
+
+                // OverlayService 시작
+                val overlayIntent = Intent(this, OverlayService::class.java)
+                startService(overlayIntent)
             }
 
         }
@@ -147,6 +154,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // CircularProgressBar와 TextView의 값을 Overlay에 전송하는 함수
+    private fun sendValuesToOverlay() {
+        val intent = Intent("com.leehakjun.gohome.PROGRESS_UPDATE")
+        intent.putExtra("progress", circularProgressBar.progress)
+        intent.putExtra("remainingTime", timeRemainingTextView.text)
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+    }
     private fun checkWorkTimeAndLaunchShortcut() {
         val currentTime = getCurrentTime()
         val workStartTime = sharedPreferences.getString("startTime", "00:00")

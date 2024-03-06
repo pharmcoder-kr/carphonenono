@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center">
+
+    <com.mikhaellopez.circularprogressbar.CircularProgressBar
+        android:id="@+id/circularProgressBarOverlay"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="20dp"
+        app:cpb_background_progressbar_color="#E0E0E0"
+        app:cpb_progressbar_color="#4CAF50"
+        app:cpb_progressbar_width="20dp"
+        android:visibility="visible"/>
+
+    <TextView
+        android:id="@+id/timeRemainingTextViewOverlay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="카폰노노\n1분미션\n타이머"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        android:visibility="visible"/>
+
+</LinearLayout>
