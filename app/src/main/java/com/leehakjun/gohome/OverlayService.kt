@@ -29,7 +29,11 @@ class OverlayService : Service() {
 
         // WindowManager 초기화
         windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
-
+        // 핸드폰 화면 크기 가져오기
+        val displayMetrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
+        val screenWidth = displayMetrics.widthPixels
+        val screenHeight = displayMetrics.heightPixels
         // Overlay 화면을 생성하고 추가
         overlayView = LayoutInflater.from(this).inflate(R.layout.overlay_layout, null)
         val params = WindowManager.LayoutParams(
@@ -41,6 +45,9 @@ class OverlayService : Service() {
         )
         // 투명도 설정
         params.alpha = 0.8f // 여기에서 투명도 값을 조절할 수 있습니다. 0.0f부터 1.0f까지 가능합니다.
+        // 핸드폰 화면 우측 상단으로 위치 조정
+        params.x = screenWidth - overlayView.width // 화면의 가로 크기에서 overlayView의 너비를 뺀 위치
+        params.y = 0 // 상단에 위치
         windowManager.addView(overlayView, params)
 
         // Close button click listener
