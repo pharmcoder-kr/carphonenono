@@ -8,9 +8,12 @@ import android.content.IntentFilter
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.IBinder
+import android.util.DisplayMetrics
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
+import android.widget.ImageView
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import android.widget.TextView
 import com.mikhaellopez.circularprogressbar.CircularProgressBar
@@ -18,6 +21,8 @@ import com.mikhaellopez.circularprogressbar.CircularProgressBar
 class OverlayService : Service() {
     private lateinit var windowManager: WindowManager
     private lateinit var overlayView: View
+    private var offsetX = 0f
+    private var offsetY = 0f
 
     override fun onCreate() {
         super.onCreate()
@@ -34,7 +39,42 @@ class OverlayService : Service() {
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
             PixelFormat.TRANSLUCENT
         )
+        // 투명도 설정
+        params.alpha = 0.8f // 여기에서 투명도 값을 조절할 수 있습니다. 0.0f부터 1.0f까지 가능합니다.
         windowManager.addView(overlayView, params)
+
+        // Close button click listener
+        val closeButton = overlayView.findViewById<ImageView>(R.id.closeButton)
+        closeButton.setOnClickListener {
+            stopSelf() // Service 종료
+        }
+
+        // 터치 리스너 추가
+        overlayView.setOnTouchListener { view, motionEvent ->
+            val layoutParams = view.layoutParams as WindowManager.LayoutParams
+
+            when (motionEvent.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    // 터치 다운 이벤트 처리
+                    offsetX = motionEvent.rawX - layoutParams.x
+                    offsetY = motionEvent.rawY - layoutParams.y
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    // 터치 이동 이벤트 처리
+                    val newX = motionEvent.rawX - offsetX
+                    val newY = motionEvent.rawY - offsetY
+
+                    layoutParams.x = newX.toInt()
+                    layoutParams.y = newY.toInt()
+
+                    windowManager.updateViewLayout(overlayView, layoutParams)
+                }
+            }
+            true
+        }
+
+
+
 
         // BroadcastReceiver 등록
         val filter = IntentFilter("com.leehakjun.gohome.PROGRESS_UPDATE")

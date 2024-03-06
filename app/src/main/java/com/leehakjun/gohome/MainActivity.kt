@@ -155,12 +155,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     // CircularProgressBar와 TextView의 값을 Overlay에 전송하는 함수
+// CircularProgressBar와 TextView의 값을 Overlay에 전송하는 함수
     private fun sendValuesToOverlay() {
         val intent = Intent("com.leehakjun.gohome.PROGRESS_UPDATE")
         intent.putExtra("progress", circularProgressBar.progress)
         intent.putExtra("remainingTime", timeRemainingTextView.text)
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
     }
+
     private fun checkWorkTimeAndLaunchShortcut() {
         val currentTime = getCurrentTime()
         val workStartTime = sharedPreferences.getString("startTime", "00:00")
