@@ -109,12 +109,13 @@ class MainActivity : AppCompatActivity() {
                 updateUI() // UI 업데이트
                 // CircularProgressBar를 초록색으로 초기화
                 circularProgressBar.progressBarColor = ContextCompat.getColor(this, R.color.green)
-                // Overlay에 CircularProgressBar와 TextView의 값을 전송
-                sendValuesToOverlay()
+
 
                 // OverlayService 시작
                 val overlayIntent = Intent(this, OverlayService::class.java)
                 startService(overlayIntent)
+
+
             }
 
         }
@@ -123,6 +124,7 @@ class MainActivity : AppCompatActivity() {
 
         // CircularProgressBar를 100%로 초기화
         circularProgressBar.progress = 100f
+
 
         // timeRemainingTextView의 디폴트 텍스트 설정
         timeRemainingTextView.text = "카폰노노\n1분미션\n타이머"
@@ -160,8 +162,9 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent("com.leehakjun.gohome.PROGRESS_UPDATE")
         intent.putExtra("progress", circularProgressBar.progress)
         intent.putExtra("remainingTime", timeRemainingTextView.text)
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+        sendBroadcast(intent) // LocalBroadcastManager.getInstance(this).sendBroadcast(intent) 대신 사용
     }
+
 
     private fun checkWorkTimeAndLaunchShortcut() {
         val currentTime = getCurrentTime()
@@ -201,6 +204,7 @@ class MainActivity : AppCompatActivity() {
                 elapsedTime += 1000
                 updateTimerText(elapsedTime)
                 updateCircularProgressBar(60000L - elapsedTime)
+                sendValuesToOverlay() // 타이머의 틱마다 Overlay로 현재 상태 업데이트
             }
 
             override fun onFinish() {

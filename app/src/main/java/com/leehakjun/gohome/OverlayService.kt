@@ -85,19 +85,20 @@ class OverlayService : Service() {
 
         // BroadcastReceiver 등록
         val filter = IntentFilter("com.leehakjun.gohome.PROGRESS_UPDATE")
-        LocalBroadcastManager.getInstance(this).registerReceiver(progressReceiver, filter)
+        registerReceiver(progressReceiver, filter) // LocalBroadcastManager.getInstance(this).registerReceiver(progressReceiver, filter) 대신 사용
     }
 
     override fun onDestroy() {
         super.onDestroy()
         // BroadcastReceiver 해제
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(progressReceiver)
+        unregisterReceiver(progressReceiver) // 수정된 부분
 
         // 서비스가 종료될 때 WindowManager에서 View 제거
         if (windowManager != null && overlayView != null) {
             windowManager.removeView(overlayView)
         }
     }
+
 
     // MainActivity로부터 CircularProgressBar 값과 TextView 값 받기
     private val progressReceiver = object : BroadcastReceiver() {

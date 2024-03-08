@@ -52,7 +52,9 @@
             android:name=".BluetoothDetectionService"
             android:enabled="true"
             android:exported="false" />
-        <service android:name=".OverlayService" />
+        <service android:name=".OverlayService"
+            android:exported="false"/>
+
 
 
     </application>
