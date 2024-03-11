@@ -304,6 +304,7 @@ class MainActivity : AppCompatActivity() {
         if (!hasPermissions()) {
             showPermissionRequestDialog()
         }
+
     }
 
     override fun onPause() {
@@ -357,6 +358,13 @@ class MainActivity : AppCompatActivity() {
             .create()
             .show()
     }
+    override fun onDestroy() {
+        super.onDestroy()
+        // 서비스 종료 인텐트 생성
+        val serviceIntent = Intent(this, OverlayService::class.java)
+        // 서비스 종료
+        stopService(serviceIntent)
+    }
 
     private fun isAutoStartEnabled(): Boolean {
         return sharedPreferences.getBoolean("autoStartEnabled", false)
@@ -372,3 +380,4 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
+
