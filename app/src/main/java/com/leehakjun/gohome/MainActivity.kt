@@ -359,11 +359,13 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
     override fun onDestroy() {
-        super.onDestroy()
-        // 서비스 종료 인텐트 생성
+        countDownTimer?.cancel() // 타이머 중지
         val serviceIntent = Intent(this, OverlayService::class.java)
         // 서비스 종료
         stopService(serviceIntent)
+        super.onDestroy()
+        // 서비스 종료 인텐트 생성
+
     }
 
     private fun isAutoStartEnabled(): Boolean {
