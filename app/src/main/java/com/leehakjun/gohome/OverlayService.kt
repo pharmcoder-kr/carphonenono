@@ -9,6 +9,7 @@ import android.graphics.PixelFormat
 import android.os.Build
 import android.os.IBinder
 import android.util.DisplayMetrics
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -30,7 +31,6 @@ class OverlayService : Service() {
         val displayMetrics = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(displayMetrics)
         val screenWidth = displayMetrics.widthPixels
-        val screenHeight = displayMetrics.heightPixels
 
         overlayView = LayoutInflater.from(this).inflate(R.layout.overlay_layout, null)
         val params = WindowManager.LayoutParams(
@@ -40,9 +40,12 @@ class OverlayService : Service() {
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
             PixelFormat.TRANSLUCENT
         )
-        params.alpha = 0.8f
-        params.x = screenWidth - overlayView.width
+
+        // 오버레이 뷰의 초기 위치를 설정
+        params.gravity = Gravity.TOP or Gravity.START
+        params.x = 0
         params.y = 0
+
         windowManager.addView(overlayView, params)
 
         val closeButton = overlayView.findViewById<ImageView>(R.id.closeButton)
@@ -50,9 +53,9 @@ class OverlayService : Service() {
             stopSelf()
         }
 
+        // 오버레이 뷰를 드래그하여 이동할 수 있게 처리
         overlayView.setOnTouchListener { view, motionEvent ->
             val layoutParams = view.layoutParams as WindowManager.LayoutParams
-
             when (motionEvent.action) {
                 MotionEvent.ACTION_DOWN -> {
                     offsetX = motionEvent.rawX - layoutParams.x
@@ -64,7 +67,7 @@ class OverlayService : Service() {
                     windowManager.updateViewLayout(overlayView, layoutParams)
                 }
             }
-            true
+            false // 이벤트가 여기서 종료되지 않고, 다른 처리(예: 클릭)를 위해 계속 전파되도록 함
         }
 
         val filter = IntentFilter("com.leehakjun.gohome.PROGRESS_UPDATE")
