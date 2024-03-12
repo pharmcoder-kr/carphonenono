@@ -43,17 +43,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val screenStateReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            when (intent?.action) {
-                Intent.ACTION_SCREEN_OFF -> {
-                    if (isTimerRunning) {
-                        countDownTimer?.cancel()
-                    }
+        override fun onReceive(context: Context?, intent: Intent) {
+            when (intent.getStringExtra("ScreenState")) {
+                "SCREEN_OFF" -> if (isTimerRunning) {
+                    // 타이머 일시정지 로직
+                    countDownTimer?.cancel()
                 }
-                Intent.ACTION_SCREEN_ON -> {
-                    if (isTimerRunning && isAutoStartEnabled()) {
-                        startTimer()
-                    }
+                "SCREEN_ON" -> if (isTimerRunning) {
+                    // 타이머 재시작 로직
+                    startTimer()
                 }
             }
         }
@@ -141,6 +139,7 @@ class MainActivity : AppCompatActivity() {
                 updateMissionText(missionSuccess) // 미션 텍스트 업데이트
                 stopTimer()
             }
+
         }
 
 
@@ -154,6 +153,15 @@ class MainActivity : AppCompatActivity() {
                 startButton.performClick() // startButton 클릭 이벤트 프로그래밍적으로 트리거
             }
         }
+        // ScreenStateService 시작
+        val screenStateServiceIntent = Intent(this, ScreenStateService::class.java)
+        startService(screenStateServiceIntent)
+
+        // BroadcastReceiver 등록
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+            screenStateReceiver,
+            IntentFilter("com.leehakjun.gohome.SCREEN_STATE")
+        )
     }
 
     // CircularProgressBar와 TextView의 값을 Overlay에 전송하는 함수
@@ -363,6 +371,8 @@ class MainActivity : AppCompatActivity() {
         val serviceIntent = Intent(this, OverlayService::class.java)
         // 서비스 종료
         stopService(serviceIntent)
+        // BroadcastReceiver 해제
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(screenStateReceiver)
         super.onDestroy()
         // 서비스 종료 인텐트 생성
 
