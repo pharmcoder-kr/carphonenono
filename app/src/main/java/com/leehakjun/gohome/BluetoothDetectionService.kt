@@ -76,6 +76,17 @@ class BluetoothDetectionService : Service() {
         }
     }
 
+    private fun handleBluetoothDisconnected(context: Context?, device: BluetoothDevice?) {
+        val sharedPreferences = context?.getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
+        val targetBluetoothDeviceAddress = sharedPreferences?.getString("bluetooth_device_address", "")
+        if (device?.address == targetBluetoothDeviceAddress) {
+            Log.d(TAG, "Disconnected from target Bluetooth device: ${device?.name} - ${device?.address}")
+            // 브로드캐스트 인텐트 생성 및 전송
+            val intent = Intent("com.leehakjun.gohome.ACTION_STOP")
+            context?.sendBroadcast(intent)
+        }
+    }
+
 
 
 
@@ -99,8 +110,8 @@ class BluetoothDetectionService : Service() {
                         }
                         BluetoothAdapter.STATE_DISCONNECTED -> {
                             // Bluetooth가 연결이 끊긴 경우
-                            Log.d(TAG, "Bluetooth disconnected")
-                            // 여기서 필요한 로직 실행
+                            val device = intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
+                            handleBluetoothDisconnected(context, device)
                         }
                     }
                 }

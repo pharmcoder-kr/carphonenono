@@ -41,7 +41,12 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val REQUEST_CODE = 101
     }
-
+    private val stopReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            // stopButton의 클릭 이벤트를 프로그래밍 방식으로 실행
+            stopButton.performClick()
+        }
+    }
     private val screenStateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
             when (intent.getStringExtra("ScreenState")) {
@@ -153,6 +158,13 @@ class MainActivity : AppCompatActivity() {
                 startButton.performClick() // startButton 클릭 이벤트 프로그래밍적으로 트리거
             }
         }
+        // 타겟 블루투스가 연결 해제되었을 때의 동작 추가
+        if (intent.hasExtra("autoStopBluetooth")) {
+            if (intent.getBooleanExtra("autoStopBluetooth", false)) {
+                stopButton.performClick() // stopButton 클릭 이벤트 프로그래밍적으로 트리거
+            }
+        }
+
         // ScreenStateService 시작
         val screenStateServiceIntent = Intent(this, ScreenStateService::class.java)
         startService(screenStateServiceIntent)
@@ -162,6 +174,9 @@ class MainActivity : AppCompatActivity() {
             screenStateReceiver,
             IntentFilter("com.leehakjun.gohome.SCREEN_STATE")
         )
+        // 브로드캐스트 리시버 등록
+        val filter = IntentFilter("com.leehakjun.gohome.ACTION_STOP")
+        registerReceiver(stopReceiver, filter)
     }
 
     // CircularProgressBar와 TextView의 값을 Overlay에 전송하는 함수
