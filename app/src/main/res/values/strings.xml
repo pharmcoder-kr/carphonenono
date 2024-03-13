@@ -2,4 +2,5 @@
     <string name="app_name">휴폰출퇴근</string>
     <string name="score_format">휴폰SCORE: %d</string>
     <string name="close_button">Close</string>
+    <string name="accessibility_service_description">티맵사용중에는 타이머를 멈추기위한 기능 구현을 위해 필요</string>
 </resources>

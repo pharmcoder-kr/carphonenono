@@ -40,6 +40,11 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val REQUEST_CODE = 101
+        private var instance: MainActivity? = null
+
+        fun getInstance(): MainActivity? {
+            return instance
+        }
     }
     // stopReceiver의 새로운 구현
     private val stopReceiver = object : BroadcastReceiver() {
@@ -88,6 +93,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        if (!isAccessibilityServiceEnabled()) {
+            showAccessibilityServiceDialog()
+        }
 
         if (!Settings.canDrawOverlays(this)) {
             val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
@@ -191,6 +200,42 @@ class MainActivity : AppCompatActivity() {
         // stopReceiver 등록
         val stopFilter = IntentFilter("com.leehakjun.gohome.ACTION_STOP")
         registerReceiver(stopReceiver, stopFilter)
+        instance = this
+    }
+    private fun isAccessibilityServiceEnabled(): Boolean {
+        val serviceName = packageName + "/" + MyAccessibilityService::class.java.canonicalName
+        val accessibilityEnabled = Settings.Secure.getInt(
+            contentResolver,
+            Settings.Secure.ACCESSIBILITY_ENABLED, 0
+        )
+        val enabledServices = Settings.Secure.getString(
+            contentResolver,
+            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+        )
+        return accessibilityEnabled == 1 && enabledServices?.contains(serviceName) == true
+    }
+
+    private fun showAccessibilityServiceDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("접근성 서비스 활성화 필요")
+            .setMessage("이 앱의 일부 기능을 사용하려면 접근성 서비스를 활성화해야 합니다.")
+            .setPositiveButton("설정으로 이동") { dialog, which ->
+                val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                startActivity(intent)
+            }
+            .setNegativeButton("취소", null)
+            .show()
+    }
+    // 타이머를 일시 정지하는 메소드
+    fun pauseTimer() {
+        countDownTimer?.cancel()
+        // 여기서 elapsedTime은 계속 유지됩니다.
+    }
+
+    // 타이머를 재시작하는 메소드
+    fun resumeTimer() {
+        startTimer()
+        // startTimer 메소드는 elapsedTime을 기반으로 타이머를 다시 시작합니다.
     }
 
     // CircularProgressBar와 TextView의 값을 Overlay에 전송하는 함수
@@ -403,6 +448,7 @@ class MainActivity : AppCompatActivity() {
         // BroadcastReceiver 해제
         LocalBroadcastManager.getInstance(this).unregisterReceiver(screenStateReceiver)
         unregisterReceiver(stopReceiver) // stopReceiver 해제
+        instance = null
         super.onDestroy()
         // 서비스 종료 인텐트 생성
 
