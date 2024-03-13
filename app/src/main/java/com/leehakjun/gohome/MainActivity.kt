@@ -41,10 +41,21 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val REQUEST_CODE = 101
     }
+    // stopReceiver의 새로운 구현
     private val stopReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            // stopButton의 클릭 이벤트를 프로그래밍 방식으로 실행
-            stopButton.performClick()
+            // stop 버튼 클릭 이벤트를 수동으로 처리
+            if (isTimerRunning) {
+                runOnUiThread {
+                    stopButton.performClick()
+                }
+            }
+
+            // MainActivity를 전면으로 가져오는 Intent 생성 및 실행
+            val showIntent = Intent(context, MainActivity::class.java)
+            showIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            showIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+            context?.startActivity(showIntent)
         }
     }
     private val screenStateReceiver = object : BroadcastReceiver() {
@@ -177,6 +188,9 @@ class MainActivity : AppCompatActivity() {
         // 브로드캐스트 리시버 등록
         val filter = IntentFilter("com.leehakjun.gohome.ACTION_STOP")
         registerReceiver(stopReceiver, filter)
+        // stopReceiver 등록
+        val stopFilter = IntentFilter("com.leehakjun.gohome.ACTION_STOP")
+        registerReceiver(stopReceiver, stopFilter)
     }
 
     // CircularProgressBar와 TextView의 값을 Overlay에 전송하는 함수
@@ -388,6 +402,7 @@ class MainActivity : AppCompatActivity() {
         stopService(serviceIntent)
         // BroadcastReceiver 해제
         LocalBroadcastManager.getInstance(this).unregisterReceiver(screenStateReceiver)
+        unregisterReceiver(stopReceiver) // stopReceiver 해제
         super.onDestroy()
         // 서비스 종료 인텐트 생성
 
