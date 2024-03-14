@@ -158,7 +158,10 @@ class MainActivity : AppCompatActivity() {
 
         }
 
-
+        val exitButton: Button = findViewById(R.id.exitButton)
+        exitButton.setOnClickListener {
+            finishAndRemoveTask() // 액티비티 종료
+        }
         // 현재 시간이 출퇴근 시간 범위에 들어가지 않으면 버튼 비활성화 및 색상 변경
         if (!isWithinWorkTime()) {
             disableButtons()
