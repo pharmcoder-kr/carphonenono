@@ -154,14 +154,27 @@ class MainActivity : AppCompatActivity() {
                 updateTimerText(elapsedTime)
                 updateMissionText(missionSuccess) // 미션 텍스트 업데이트
                 stopTimer()
+
             }
 
         }
 
         val exitButton: Button = findViewById(R.id.exitButton)
         exitButton.setOnClickListener {
-            finishAndRemoveTask() // 액티비티 종료
+            // 사용자에게 종료 여부를 확인하는 AlertDialog 생성 및 표시
+            AlertDialog.Builder(this).apply {
+                setTitle("앱 종료") // 팝업 제목
+                setMessage("앱을 종료하시겠습니까?") // 팝업 메시지
+                setPositiveButton("예") { dialog, which ->
+                    finishAndRemoveTask() // 사용자가 '예'를 선택하면 앱 종료
+                }
+                setNegativeButton("아니오") { dialog, which ->
+                    dialog.dismiss() // 사용자가 '아니오'를 선택하면 팝업만 닫힘
+                }
+                create().show() // AlertDialog를 생성하고 표시
+            }
         }
+
         // 현재 시간이 출퇴근 시간 범위에 들어가지 않으면 버튼 비활성화 및 색상 변경
         if (!isWithinWorkTime()) {
             disableButtons()
