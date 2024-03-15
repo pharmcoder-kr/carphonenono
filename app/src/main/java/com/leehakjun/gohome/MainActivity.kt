@@ -1,7 +1,9 @@
 package com.leehakjun.gohome
 
 import android.Manifest
+import android.accessibilityservice.AccessibilityService
 import android.content.BroadcastReceiver
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -13,9 +15,12 @@ import android.os.CountDownTimer
 import android.os.Handler
 import android.os.PowerManager
 import android.provider.Settings
+import android.text.TextUtils
 import android.util.Log
+import android.view.accessibility.AccessibilityManager
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -31,6 +36,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var missionTextView: TextView
     private lateinit var powerManager: PowerManager
     private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var timerControlReceiver: BroadcastReceiver
     private var countDownTimer: CountDownTimer? = null
     private var isTimerRunning = false
     private var elapsedTime: Long = 0L
@@ -207,8 +213,52 @@ class MainActivity : AppCompatActivity() {
         // stopReceiver 등록
         val stopFilter = IntentFilter("com.leehakjun.gohome.ACTION_STOP")
         registerReceiver(stopReceiver, stopFilter)
+        if (!isAccessibilityServiceEnabled(this, MyAccessibilityService::class.java)) {
+            // 사용자가 AccessibilityService를 활성화하지 않았다면 설정 페이지로 이동
+            val accessibilityIntent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+            startActivity(accessibilityIntent)
+            Toast.makeText(this, "서비스 목록에서 [티맵 타이머 제어]를 찾아 활성화해주세요.", Toast.LENGTH_LONG).show()
+        }
+
+        // BroadcastReceiver 초기화 및 등록
+        timerControlReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                when (intent?.action) {
+                    "com.leehakjun.gohome.TIMER_PAUSE" -> pauseTimer()
+                    "com.leehakjun.gohome.TIMER_RESUME" -> resumeTimer()
+                }
+            }
+        }
+        val tmapfilter = IntentFilter().apply {
+            addAction("com.leehakjun.gohome.TIMER_PAUSE")
+            addAction("com.leehakjun.gohome.TIMER_RESUME")
+        }
+        LocalBroadcastManager.getInstance(this).registerReceiver(timerControlReceiver, tmapfilter)
+    }
+    // pauseTimer와 resumeTimer 메소드 구현
+    private fun isAccessibilityServiceEnabled(context: Context, service: Class<out AccessibilityService>): Boolean {
+        val am = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
+        val enabledServices = Settings.Secure.getString(context.contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
+        val colonSplitter = TextUtils.SimpleStringSplitter(':')
+        colonSplitter.setString(enabledServices)
+        while (colonSplitter.hasNext()) {
+            val componentName = ComponentName.unflattenFromString(colonSplitter.next())
+            if (componentName != null && componentName.className == service.name) {
+                return true
+            }
+        }
+        return false
     }
 
+    private fun pauseTimer() {
+        // 타이머 일시정지 로직
+        countDownTimer?.cancel()
+    }
+
+    private fun resumeTimer() {
+        // 타이머 재시작 로직
+        startTimer()
+    }
     // CircularProgressBar와 TextView의 값을 Overlay에 전송하는 함수
 // CircularProgressBar와 TextView의 값을 Overlay에 전송하는 함수
     private fun sendValuesToOverlay() {
@@ -418,6 +468,7 @@ class MainActivity : AppCompatActivity() {
         stopService(serviceIntent)
         // BroadcastReceiver 해제
         LocalBroadcastManager.getInstance(this).unregisterReceiver(screenStateReceiver)
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(timerControlReceiver)
         unregisterReceiver(stopReceiver) // stopReceiver 해제
         super.onDestroy()
         // 서비스 종료 인텐트 생성
