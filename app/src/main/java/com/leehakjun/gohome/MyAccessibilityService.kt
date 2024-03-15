@@ -2,20 +2,34 @@ package com.leehakjun.gohome
 
 import android.accessibilityservice.AccessibilityService
 import android.content.Intent
+import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 
 class MyAccessibilityService : AccessibilityService() {
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        if (event?.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            val packageName = event.packageName.toString()
+        Log.d("AccessibilityService", "Event received: ${event?.eventType}, Package: ${event?.packageName}")
 
-            if (packageName == "com.skt.tmap.ku") {
-                // 티맵이 활성화되었을 때
-                pauseTimerInMainActivity()
-            } else {
-                // 티맵이 활성화되지 않았을 때
-                resumeTimerInMainActivity()
+        when (event?.eventType) {
+            AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED -> {
+                val packageName = event.packageName.toString()
+                if (packageName == "com.skt.tmap.ku") {
+                    Log.d("AccessibilityService", "TMap is active - pausing timer")
+                    pauseTimerInMainActivity()
+                } else {
+                    Log.d("AccessibilityService", "TMap is not active - resuming timer")
+                    resumeTimerInMainActivity()
+                }
+            }
+            AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED, AccessibilityEvent.TYPE_VIEW_CLICKED -> {
+                val packageName = event.packageName.toString()
+                if (packageName == "com.skt.tmap.ku") {
+                    Log.d("AccessibilityService", "TMap is active - pausing timer")
+                    pauseTimerInMainActivity()
+                } else {
+                    Log.d("AccessibilityService", "TMap is not active - resuming timer")
+                    resumeTimerInMainActivity()
+                }
             }
         }
     }
@@ -25,11 +39,13 @@ class MyAccessibilityService : AccessibilityService() {
 
     private fun pauseTimerInMainActivity() {
         val pauseIntent = Intent("com.leehakjun.gohome.TIMER_PAUSE")
-        LocalBroadcastManager.getInstance(this).sendBroadcast(pauseIntent)
+        sendBroadcast(pauseIntent)
     }
 
     private fun resumeTimerInMainActivity() {
+        Log.d("AccessibilityService", "Sending TIMER_RESUME intent")
         val resumeIntent = Intent("com.leehakjun.gohome.TIMER_RESUME")
-        LocalBroadcastManager.getInstance(this).sendBroadcast(resumeIntent)
+        sendBroadcast(resumeIntent)
     }
+
 }

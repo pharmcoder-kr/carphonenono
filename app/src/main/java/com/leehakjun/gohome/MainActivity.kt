@@ -224,16 +224,23 @@ class MainActivity : AppCompatActivity() {
         timerControlReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 when (intent?.action) {
-                    "com.leehakjun.gohome.TIMER_PAUSE" -> pauseTimer()
-                    "com.leehakjun.gohome.TIMER_RESUME" -> resumeTimer()
+                    "com.leehakjun.gohome.TIMER_PAUSE" -> {
+                        Log.d("MainActivity", "TIMER_PAUSE received")
+                        pauseTimer()
+                    }
+                    "com.leehakjun.gohome.TIMER_RESUME" -> {
+                        Log.d("MainActivity", "TIMER_RESUME received")
+                        resumeTimer()
+                    }
                 }
             }
         }
+
         val tmapfilter = IntentFilter().apply {
             addAction("com.leehakjun.gohome.TIMER_PAUSE")
             addAction("com.leehakjun.gohome.TIMER_RESUME")
         }
-        LocalBroadcastManager.getInstance(this).registerReceiver(timerControlReceiver, tmapfilter)
+        registerReceiver(timerControlReceiver, tmapfilter)
     }
     // pauseTimer와 resumeTimer 메소드 구현
     private fun isAccessibilityServiceEnabled(context: Context, service: Class<out AccessibilityService>): Boolean {
@@ -468,8 +475,9 @@ class MainActivity : AppCompatActivity() {
         stopService(serviceIntent)
         // BroadcastReceiver 해제
         LocalBroadcastManager.getInstance(this).unregisterReceiver(screenStateReceiver)
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(timerControlReceiver)
+        unregisterReceiver(timerControlReceiver)
         unregisterReceiver(stopReceiver) // stopReceiver 해제
+
         super.onDestroy()
         // 서비스 종료 인텐트 생성
 
