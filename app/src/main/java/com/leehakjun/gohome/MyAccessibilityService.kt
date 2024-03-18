@@ -21,16 +21,7 @@ class MyAccessibilityService : AccessibilityService() {
                     resumeTimerInMainActivity()
                 }
             }
-            AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED, AccessibilityEvent.TYPE_VIEW_CLICKED -> {
-                val packageName = event.packageName.toString()
-                if (packageName == "com.skt.tmap.ku") {
-                    Log.d("AccessibilityService", "TMap is active - pausing timer")
-                    pauseTimerInMainActivity()
-                } else {
-                    Log.d("AccessibilityService", "TMap is not active - resuming timer")
-                    resumeTimerInMainActivity()
-                }
-            }
+
         }
     }
 
