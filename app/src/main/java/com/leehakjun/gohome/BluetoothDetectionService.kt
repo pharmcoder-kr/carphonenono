@@ -66,6 +66,7 @@ class BluetoothDetectionService : Service() {
                 putExtra("autoStartBluetooth", true)
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
+            context?.startActivity(mainActivityIntent)
             if (mainActivityIntent.resolveActivity(context!!.packageManager) != null) {
                 Log.d(TAG, "Launching $packageName...")
                 context.startActivity(mainActivityIntent)

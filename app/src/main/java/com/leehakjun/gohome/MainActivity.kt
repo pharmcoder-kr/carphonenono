@@ -220,7 +220,12 @@ class MainActivity : AppCompatActivity() {
         sendBroadcast(intent) // LocalBroadcastManager.getInstance(this).sendBroadcast(intent) 대신 사용
     }
 
-
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        if (intent.getBooleanExtra("autoStartBluetooth", false)) {
+            startButton.performClick()
+        }
+    }
     private fun checkWorkTimeAndLaunchShortcut() {
         val currentTime = getCurrentTime()
         val workStartTime = sharedPreferences.getString("startTime", "00:00")
