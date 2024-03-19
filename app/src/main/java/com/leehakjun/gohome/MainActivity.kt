@@ -155,6 +155,8 @@ class MainActivity : AppCompatActivity() {
                 updateMissionText(missionSuccess) // 미션 텍스트 업데이트
                 stopTimer()
 
+                val overlayIntent = Intent(this, OverlayService::class.java)
+                stopService(overlayIntent)
             }
 
         }
@@ -400,7 +402,7 @@ class MainActivity : AppCompatActivity() {
     private fun showPermissionRequestDialog() {
         AlertDialog.Builder(this)
             .setTitle("Permission Request")
-            .setMessage("This app requires Bluetooth and Location permissions to function.")
+            .setMessage("이 어플은 블루투스와 위치권한을 사용합니다.")
             .setPositiveButton("OK") { _, _ ->
                 requestPermissions()
             }
