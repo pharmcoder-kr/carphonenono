@@ -220,6 +220,7 @@ class MainActivity : AppCompatActivity() {
         sendBroadcast(intent) // LocalBroadcastManager.getInstance(this).sendBroadcast(intent) 대신 사용
     }
 
+
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         if (intent.getBooleanExtra("autoStartBluetooth", false)) {
@@ -233,22 +234,36 @@ class MainActivity : AppCompatActivity() {
         val workStartTime2 = sharedPreferences.getString("startTime2", "12:00")
         val workEndTime2 = sharedPreferences.getString("endTime2", "24:00")
 
-        workStartTime?.let { start ->
+        val isInFirstWorkPeriod = workStartTime?.let { start ->
             workEndTime?.let { end ->
-                if (currentTime in start..end) {
-                    launchShortcut("회사")
-                }
+                currentTime in start..end
             }
-        }
+        } ?: false
 
-        workStartTime2?.let { start2 ->
+        val isInSecondWorkPeriod = workStartTime2?.let { start2 ->
             workEndTime2?.let { end2 ->
-                if (currentTime in start2..end2) {
-                    launchShortcut("우리집")
-                }
+                currentTime in start2..end2
             }
+        } ?: false
+
+        when {
+            isInFirstWorkPeriod -> launchShortcut("회사")
+            isInSecondWorkPeriod -> launchShortcut("우리집")
+            else -> launchTmapMainPage()
         }
     }
+
+    private fun launchTmapMainPage() {
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            setClassName("com.skt.tmap.ku", "com.skt.tmap.activity.TmapIntroActivity")
+        }
+        try {
+            startActivity(intent)
+        } catch (e: Exception) {
+            Log.e("LaunchTmapMainPage", "Error launching Tmap main page: ${e.message}")
+        }
+    }
+
 
     private fun getCurrentTime(): String {
         val calendar = Calendar.getInstance()
