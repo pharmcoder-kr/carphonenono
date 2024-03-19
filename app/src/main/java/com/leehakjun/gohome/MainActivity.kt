@@ -135,6 +135,11 @@ class MainActivity : AppCompatActivity() {
                 val overlayIntent = Intent(this, OverlayService::class.java)
                 startService(overlayIntent)
 
+                val tmapfilter = IntentFilter().apply {
+                    addAction("com.leehakjun.gohome.TIMER_PAUSE")
+                    addAction("com.leehakjun.gohome.TIMER_RESUME")
+                }
+                registerReceiver(timerControlReceiver, tmapfilter)
 
             }
 
@@ -236,11 +241,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val tmapfilter = IntentFilter().apply {
-            addAction("com.leehakjun.gohome.TIMER_PAUSE")
-            addAction("com.leehakjun.gohome.TIMER_RESUME")
-        }
-        registerReceiver(timerControlReceiver, tmapfilter)
+
     }
     // pauseTimer와 resumeTimer 메소드 구현
     private fun isAccessibilityServiceEnabled(context: Context, service: Class<out AccessibilityService>): Boolean {
@@ -407,9 +408,7 @@ class MainActivity : AppCompatActivity() {
         registerReceiver(screenStateReceiver, filter)
         registerReceiver(settingsChangedReceiver, filter)
 
-        if (isTimerRunning && powerManager.isInteractive) {
-            startTimer()
-        }
+
 
         if (!hasPermissions()) {
             showPermissionRequestDialog()
