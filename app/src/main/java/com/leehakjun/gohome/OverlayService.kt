@@ -94,9 +94,13 @@ class OverlayService : Service() {
 
     private fun resetOverlayBackgroundToInitial() {
         val overlayLayout = overlayView.findViewById<ConstraintLayout>(R.id.overlayLayout)
-        // overlay_layout.xml에 정의된 초기 배경 리소스로 리셋
-        overlayLayout.setBackgroundResource(R.drawable.rounded_background)
+        // 매번 새로운 Drawable 인스턴스를 생성하여 배경으로 설정
+        val newBackground = ContextCompat.getDrawable(this, R.drawable.rounded_background) as GradientDrawable
+        // 초록색으로 배경색 설정, 여기서 R.color.green은 colors.xml에 정의된 색상 리소스
+        newBackground.setColor(ContextCompat.getColor(this, R.color.roundedGreen))
+        overlayLayout.background = newBackground
     }
+
 
 
     private fun resetUIComponentsToInitialState() {
