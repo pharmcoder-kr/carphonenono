@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">휴폰출퇴근</string>
+    <string name="app_name">카폰노노</string>
     <string name="score_format">휴폰SCORE: %d</string>
     <string name="close_button">Close</string>
 </resources>
