@@ -178,9 +178,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // 현재 시간이 출퇴근 시간 범위에 들어가지 않으면 버튼 비활성화 및 색상 변경
-        if (!isWithinWorkTime()) {
-            disableButtons()
-        }
+
         // 타겟 블루투스가 연결되었을 때의 동작 추가
         if (intent.hasExtra("autoStartBluetooth")) {
             if (intent.getBooleanExtra("autoStartBluetooth", false)) {
@@ -434,21 +432,16 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
     override fun onDestroy() {
-        countDownTimer?.cancel() // 타이머 중지
+        super.onDestroy()
+        // 서비스 종료 인텐트 생성
         val serviceIntent = Intent(this, OverlayService::class.java)
         // 서비스 종료
         stopService(serviceIntent)
         // BroadcastReceiver 해제
         LocalBroadcastManager.getInstance(this).unregisterReceiver(screenStateReceiver)
         unregisterReceiver(stopReceiver) // stopReceiver 해제
-        super.onDestroy()
-        // 서비스 종료 인텐트 생성
-
     }
 
-    private fun isAutoStartEnabled(): Boolean {
-        return sharedPreferences.getBoolean("autoStartEnabled", false)
-    }
 
     private fun updateMissionText(missionSuccess: Boolean) {
         if (missionSuccess) {

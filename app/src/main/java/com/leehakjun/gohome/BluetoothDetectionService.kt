@@ -64,7 +64,7 @@ class BluetoothDetectionService : Service() {
             val mainActivityIntent = Intent(context, MainActivity::class.java).apply {
                 // startButton을 클릭하는 동작을 추가한 인텐트를 전달
                 putExtra("autoStartBluetooth", true)
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
             }
             context?.startActivity(mainActivityIntent)
             if (mainActivityIntent.resolveActivity(context!!.packageManager) != null) {
