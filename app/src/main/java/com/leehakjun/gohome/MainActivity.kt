@@ -216,6 +216,9 @@ class MainActivity : AppCompatActivity() {
         intent.putExtra("progress", circularProgressBar.progress)
         intent.putExtra("remainingTime", timeRemainingTextView.text)
         sendBroadcast(intent) // LocalBroadcastManager.getInstance(this).sendBroadcast(intent) 대신 사용
+        // 미션 실패 조건에 따라 배경색 변경 신호 추가
+        intent.putExtra("missionFailed", circularProgressBar.progress == 100f)
+        sendBroadcast(intent)
     }
 
 

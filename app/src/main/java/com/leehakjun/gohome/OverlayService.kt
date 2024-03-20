@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.PixelFormat
+import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.IBinder
 import android.util.DisplayMetrics
@@ -16,6 +17,8 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import com.mikhaellopez.circularprogressbar.CircularProgressBar
 
 class OverlayService : Service() {
@@ -83,15 +86,18 @@ class OverlayService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        // 필요한 초기화 로직을 여기에 추가
-        // 예를 들어, 상태를 초기화하거나, 인텐트로부터 받은 데이터로 UI를 업데이트할 수 있습니다.
-        resetUIComponentsToInitialState()
+        resetOverlayBackgroundToInitial()
+        // 기타 초기화 로직...
 
-        // 이 서비스가 시스템에 의해 강제 종료된 후 재시작될 때, 마지막으로 전달된 인텐트로 onStartCommand()를 호출하려면 START_REDELIVER_INTENT를 반환
-        // 인텐트 없이 서비스를 재시작하려면 START_STICKY를 반환
-        // 서비스를 재시작하지 않으려면 START_NOT_STICKY를 반환
         return START_STICKY
     }
+
+    private fun resetOverlayBackgroundToInitial() {
+        val overlayLayout = overlayView.findViewById<ConstraintLayout>(R.id.overlayLayout)
+        // overlay_layout.xml에 정의된 초기 배경 리소스로 리셋
+        overlayLayout.setBackgroundResource(R.drawable.rounded_background)
+    }
+
 
     private fun resetUIComponentsToInitialState() {
         // UI 컴포넌트를 초기 상태로 설정하는 로직
@@ -107,8 +113,16 @@ class OverlayService : Service() {
             if (intent != null && intent.action == "com.leehakjun.gohome.PROGRESS_UPDATE") {
                 val progress = intent.getFloatExtra("progress", 0f)
                 val remainingTime = intent.getStringExtra("remainingTime")
+                val missionFailed = intent.getBooleanExtra("missionFailed", false)
                 updateCircularProgressBar(progress)
                 updateTimeRemainingTextView(remainingTime)
+
+                if (missionFailed) {
+                    val overlayLayout = overlayView.findViewById<ConstraintLayout>(R.id.overlayLayout)
+                    val background = overlayLayout.background as? GradientDrawable
+                    background?.setColor(ContextCompat.getColor(this@OverlayService, R.color.deepPink))
+                }
+
             }
         }
     }
