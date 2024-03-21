@@ -212,13 +212,18 @@ class MainActivity : AppCompatActivity() {
     // CircularProgressBar와 TextView의 값을 Overlay에 전송하는 함수
 // CircularProgressBar와 TextView의 값을 Overlay에 전송하는 함수
     private fun sendValuesToOverlay() {
+        val progress = circularProgressBar.progress
+        val remainingTime = timeRemainingTextView.text.toString()
+
+        // Log.d 추가하여 전송되는 값 로깅
+        Log.d("OverlayUpdate", "Sending to overlay: Progress - $progress, Remaining Time - $remainingTime")
         val intent = Intent("com.leehakjun.gohome.PROGRESS_UPDATE")
         intent.putExtra("progress", circularProgressBar.progress)
         intent.putExtra("remainingTime", timeRemainingTextView.text)
-        sendBroadcast(intent) // LocalBroadcastManager.getInstance(this).sendBroadcast(intent) 대신 사용
+
         // 미션 실패 조건에 따라 배경색 변경 신호 추가
         intent.putExtra("missionFailed", circularProgressBar.progress == 100f)
-        sendBroadcast(intent)
+        sendBroadcast(intent) // LocalBroadcastManager.getInstance(this).sendBroadcast(intent) 대신 사용
     }
 
 
@@ -440,6 +445,7 @@ class MainActivity : AppCompatActivity() {
         val serviceIntent = Intent(this, OverlayService::class.java)
         // 서비스 종료
         stopService(serviceIntent)
+        countDownTimer?.cancel() // 타이머 중지
         // BroadcastReceiver 해제
         LocalBroadcastManager.getInstance(this).unregisterReceiver(screenStateReceiver)
         unregisterReceiver(stopReceiver) // stopReceiver 해제

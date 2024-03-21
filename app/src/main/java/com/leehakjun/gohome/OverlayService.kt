@@ -10,6 +10,7 @@ import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.IBinder
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -120,7 +121,7 @@ class OverlayService : Service() {
                 val missionFailed = intent.getBooleanExtra("missionFailed", false)
                 updateCircularProgressBar(progress)
                 updateTimeRemainingTextView(remainingTime)
-
+                Log.d("ProgressReceiver", "Received progress: $progress, remaining time: $remainingTime")
                 if (missionFailed) {
                     val overlayLayout = overlayView.findViewById<ConstraintLayout>(R.id.overlayLayout)
                     val background = overlayLayout.background as? GradientDrawable
