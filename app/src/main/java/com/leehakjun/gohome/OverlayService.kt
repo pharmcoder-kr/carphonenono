@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.PixelFormat
+import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.IBinder
@@ -122,16 +123,26 @@ class OverlayService : Service() {
                 updateCircularProgressBar(progress)
                 updateTimeRemainingTextView(remainingTime)
                 Log.d("ProgressReceiver", "Received progress: $progress, remaining time: $remainingTime")
-                if (missionFailed) {
+                if (!missionFailed) {
+                    when {
+                        remainingTime != null && remainingTime.contains("1분") -> setOverlayBackground(R.color.yellow)
+                        remainingTime != null && remainingTime.contains("0분") -> setOverlayBackground(R.color.orange)
+                    }
+                } else {
                     val overlayLayout = overlayView.findViewById<ConstraintLayout>(R.id.overlayLayout)
                     val background = overlayLayout.background as? GradientDrawable
                     background?.setColor(ContextCompat.getColor(this@OverlayService, R.color.deepPink))
                 }
-
             }
         }
     }
 
+    private fun setOverlayBackground(colorResId: Int) {
+        val overlayLayout = overlayView.findViewById<ConstraintLayout>(R.id.overlayLayout)
+        val newBackground = ContextCompat.getDrawable(this, R.drawable.rounded_background) as GradientDrawable
+        newBackground.setColor(ContextCompat.getColor(this, colorResId))
+        overlayLayout.background = newBackground
+    }
     private fun updateCircularProgressBar(progress: Float) {
         val circularProgressBar = overlayView.findViewById<CircularProgressBar>(R.id.circularProgressBarOverlay)
         circularProgressBar.progress = progress
@@ -140,6 +151,8 @@ class OverlayService : Service() {
     private fun updateTimeRemainingTextView(remainingTime: String?) {
         val timeRemainingTextView = overlayView.findViewById<TextView>(R.id.timeRemainingTextViewOverlay)
         timeRemainingTextView.text = remainingTime ?: ""
+        timeRemainingTextView.setTextColor(ContextCompat.getColor(this, android.R.color.black)) // 검정색으로 설정
+        timeRemainingTextView.setTypeface(null, Typeface.BOLD) // 폰트를 굵게 설정
     }
 
     override fun onBind(intent: Intent?): IBinder? {
