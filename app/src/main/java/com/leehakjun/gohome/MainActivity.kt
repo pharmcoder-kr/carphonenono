@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
+import android.graphics.Typeface
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -464,13 +465,23 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun updateMissionText(missionSuccess: Boolean) {
-        if (missionSuccess) {
-            missionTextView.text = "축하합니다! 3분 미션 성공!"
-            missionTextView.setTextColor(ContextCompat.getColor(this, R.color.green))
-        } else {
-            missionTextView.text = "3분 미션 실패!"
-            missionTextView.setTextColor(ContextCompat.getColor(this, R.color.red))
+        val missionText: String = when {
+            elapsedTime < 60000L -> "대단하세요!! 고수 미션 성공!!" // 3단계 미션 성공 조건
+            elapsedTime < 120000L -> "축하합니다! 중수 미션 성공!\n 다음엔 고수 미션에 도전해보세요 " // 2단계 미션 성공 조건
+            elapsedTime < 180000L -> "축하합니다! 기본 미션 성공!\n 다음엔 중수 미션에 도전해보세요"  // 1단계 미션 성공 조건
+            else -> "3분 미션 실패!" // 미션 실패 조건
         }
+
+        val textColor: Int = if (missionSuccess) { // 미션 성공 시 텍스트 색상 설정
+            ContextCompat.getColor(this, R.color.green)
+        } else {
+            ContextCompat.getColor(this, R.color.red)
+        }
+
+        missionTextView.text = missionText
+        missionTextView.setTextColor(textColor)
     }
+
+
 }
 
